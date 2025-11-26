@@ -20,7 +20,7 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 		const totalSecs = Math.floor(diffMs / 1000);
 
 		if (totalSecs <= 0) {
-			return '(departed)';
+			return 'departed';
 		}
 
 		const diffMins = Math.floor(totalSecs / 60);
@@ -32,7 +32,7 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 		const diffSecs = totalSecs % 60;
 
 		if (diffMins <= 0) {
-			return '(departing now)';
+			return 'departing';
 		} else {
 			return `+${diffMins}m ${diffSecs}s`;
 		}
@@ -49,24 +49,36 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 				</Match>
 				<Match when={props.departures && props.departures.length > 0}>
 					<For each={props.departures} fallback={null}>
-						{(departure, index) => (
-							<div class={'departure-item' + (index() === 0 ? ' departure-item-next' : '')}>
-								<div class="departure-info">
-									<span>
-										<span class="departure-item-label">Platform</span> {departure.platform || '-'}
-									</span>
-								</div>
-								<div class="departure-info">
-									<span class="departure-time">
-										{formatTime(departure.estimated_departure_utc || departure.scheduled_departure_utc)}{' '}
-										<span class="relative-time">
-											{relativeTime(departure.estimated_departure_utc || departure.scheduled_departure_utc, index() === 0)}
+						{(departure, index) => {
+							const relative = relativeTime(departure.estimated_departure_utc || departure.scheduled_departure_utc, index() === 0);
+							return (
+								<div
+									class={'departure-item' + (index() === 0 ? ' departure-item-next' : '') + (relative === 'departed' ? ' departed' : '')}
+								>
+									<div class="departure-info">
+										<span>
+											<span class="departure-item-label">Platform</span> {departure.platform || '-'}
 										</span>
-									</span>
-									<div class="badge">{departure.destination}</div>
+									</div>
+									<div class="departure-info">
+										<span class="departure-time">
+											<time>{formatTime(departure.estimated_departure_utc || departure.scheduled_departure_utc)}</time>{' '}
+											<span class="relative-time">
+												<Switch fallback={relative}>
+													<Match when={relative === 'departed'}>
+														<span class="departed">Departed</span>
+													</Match>
+													<Match when={relative === 'departing'}>
+														<span class="departing">Departing</span>
+													</Match>
+												</Switch>
+											</span>
+										</span>
+										<div class="badge">{departure.destination}</div>
+									</div>
 								</div>
-							</div>
-						)}
+							);
+						}}
 					</For>
 				</Match>
 			</Switch>

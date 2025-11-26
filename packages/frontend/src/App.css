@@ -93,7 +93,7 @@ h2 {
 
 .departure-item {
 	font-weight: 500;
-	background-color: #222;
+	background-color: #333;
 	border-radius: 8px;
 	padding: 1rem;
 	text-align: left;
@@ -120,6 +120,13 @@ h2 {
 	font-size: 1.5rem;
 	font-weight: 700;
 }
+
+.departed .departure-time > time {
+	color: #888888;
+	font-weight: 400;
+	text-decoration: line-through;
+}
+
 .relative-time {
 	font-size: 1rem;
 	color: #b3b3b3;

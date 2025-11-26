@@ -7,16 +7,17 @@ const REFRESH_INTERVAL_SECONDS = 60;
 
 function App() {
 	const [departures, { refetch }] = createResource(fetchTrainData);
-	const [countdown, setCountdown] = createSignal(REFRESH_INTERVAL_SECONDS);
+	const [countdown, setCountdown] = createSignal(0);
 	const [dateTimeNow, setDateTimeNow] = createSignal(new Date());
+
 	onMount(() => {
 		const countdownInterval = setInterval(() => {
-			setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+			setCountdown((prev) => (prev < REFRESH_INTERVAL_SECONDS ? prev + 1 : 0));
 			setDateTimeNow(new Date());
 
-			if (countdown() === 0) {
+			if (countdown() === REFRESH_INTERVAL_SECONDS) {
 				refetch();
-				setCountdown(REFRESH_INTERVAL_SECONDS);
+				setCountdown(0);
 			}
 		}, 1000);
 
@@ -33,7 +34,7 @@ function App() {
 					<h2>Balaclava station to City</h2>
 				</div>
 				<div class="header-end">
-					<span class="countdown">Next refresh in: {countdown()}s</span>
+					<span class="countdown">Last updated: {countdown()}s ago</span>
 				</div>
 			</header>
 			<section>
@@ -43,6 +44,11 @@ function App() {
 					<TrainDepartures departures={departures()} dateTimeNow={dateTimeNow()} />
 				)}
 			</section>
+			<footer>
+				<p>
+					<small>Source: Licensed from Public Transport Victoria under a Creative Commons Attribution 4.0 International Licence.</small>
+				</p>
+			</footer>
 		</main>
 	);
 }
