@@ -3,7 +3,8 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"dev": "pnpm --filter frontend dev"
+		"dev": "pnpm --filter frontend dev",
+		"deploy": "pnpm --filter frontend run deploy"
 	},
 	"devDependencies": {
 		"typescript": "^5.5.2"

@@ -10,7 +10,7 @@ interface TrainDeparturesProps {
 const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 	const formatTime = (dateString: string) => {
 		const date = new Date(dateString);
-		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+		return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true });
 	};
 
 	const relativeTime = (departureDate: string, showSeconds: boolean) => {
@@ -64,8 +64,10 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 									</div>
 									<div class="departure-info">
 										<span class="departure-time">
-											<time class={isDelayedOrEarly ? 'delayed' : ''}>{formatTime(departure.scheduled_departure_utc)} </time>
-											{isDelayedOrEarly && <span>{formatTime(departure.estimated_departure_utc!)} </span>}
+											<time class={isDelayedOrEarly ? 'delayed' : ''}>
+												{formatTime(departure.scheduled_departure_utc)} {isDelayedOrEarly && <br />}
+											</time>
+											{isDelayedOrEarly && <time>{formatTime(departure.estimated_departure_utc!)} </time>}
 											<span class="relative-time">
 												<Switch fallback={relative}>
 													<Match when={relative === 'departed'}>

@@ -39,7 +39,12 @@ function App() {
 			</header>
 			<section>
 				{departures.error ? (
-					<div class="error">Error: {departures.error?.message}</div>
+					<div class="error">
+						Error: {departures.error?.message} <br />
+						<button type="button" onClick={() => refetch()}>
+							Retry
+						</button>
+					</div>
 				) : (
 					<TrainDepartures departures={departures()} dateTimeNow={dateTimeNow()} />
 				)}
