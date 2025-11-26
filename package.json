@@ -1,0 +1,11 @@
+{
+	"name": "dash",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "pnpm --filter frontend dev"
+	},
+	"devDependencies": {
+		"typescript": "^5.5.2"
+	}
+}
