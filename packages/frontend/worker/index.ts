@@ -146,11 +146,22 @@ export default {
 					};
 				});
 
+				// calculate cache TTL based on the next train
+				let cacheTtl = 60;
+				if (departures.length > 0) {
+					const nextTrain = departures[0];
+					const departureTime = new Date(nextTrain.estimated_departure_utc || nextTrain.scheduled_departure_utc).getTime();
+					const now = Date.now();
+					const secondsUntilDeparture = Math.floor((departureTime - now) / 1000);
+
+					// cache until 30 seconds after the next train departs, clamped between 30 seconds and 5 minutes
+					cacheTtl = Math.max(30, Math.min(300, secondsUntilDeparture + 30));
+				}
+
 				response = new Response(JSON.stringify(departures), {
 					headers: {
 						'Content-Type': 'application/json',
-						// cache for 60 seconds
-						'Cache-Control': 'public, max-age=60, s-maxage=60',
+						'Cache-Control': `public, max-age=${cacheTtl}, s-maxage=${cacheTtl}`,
 					},
 				});
 
