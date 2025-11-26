@@ -10,7 +10,7 @@ interface TrainDeparturesProps {
 const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 	const formatTime = (dateString: string) => {
 		const date = new Date(dateString);
-		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 	};
 
 	const relativeTime = (departureDate: string, showSeconds: boolean) => {
