@@ -51,6 +51,8 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 					<For each={props.departures} fallback={null}>
 						{(departure, index) => {
 							const relative = relativeTime(departure.estimated_departure_utc || departure.scheduled_departure_utc, index() === 0);
+							const isDelayedOrEarly =
+								departure.estimated_departure_utc && departure.scheduled_departure_utc !== departure.estimated_departure_utc;
 							return (
 								<div
 									class={'departure-item' + (index() === 0 ? ' departure-item-next' : '') + (relative === 'departed' ? ' departed' : '')}
@@ -62,7 +64,8 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 									</div>
 									<div class="departure-info">
 										<span class="departure-time">
-											<time>{formatTime(departure.estimated_departure_utc || departure.scheduled_departure_utc)}</time>{' '}
+											<time class={isDelayedOrEarly ? 'delayed' : ''}>{formatTime(departure.scheduled_departure_utc)} </time>
+											{isDelayedOrEarly && <span>{formatTime(departure.estimated_departure_utc!)} </span>}
 											<span class="relative-time">
 												<Switch fallback={relative}>
 													<Match when={relative === 'departed'}>
