@@ -54,16 +54,18 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 									class={'departure-item' + (index() === 0 ? ' departure-item-next' : '') + (relative() === 'departed' ? ' departed' : '')}
 								>
 									<div class="departure-info">
+										<span class={'departure-time-meta' + (isDelayedOrEarly ? ' strike' : '')}>
+											{isDelayedOrEarly ? <time>{formatUTCDateToLocal(departure.scheduled_departure_utc)}</time> : 'On time'}
+										</span>
 										<span>
 											<span class="departure-item-label">Platform</span> {departure.platform || '-'}
 										</span>
 									</div>
 									<div class="departure-info">
 										<span class="departure-time">
-											<time class={isDelayedOrEarly ? 'delayed' : ''}>
-												{formatUTCDateToLocal(departure.scheduled_departure_utc)} {isDelayedOrEarly && <br />}
+											<time>
+												{formatUTCDateToLocal(isDelayedOrEarly ? departure.estimated_departure_utc! : departure.scheduled_departure_utc)}{' '}
 											</time>
-											{isDelayedOrEarly && <time>{formatUTCDateToLocal(departure.estimated_departure_utc!)} </time>}
 											<span class="relative-time">
 												<Switch fallback={relative()}>
 													<Match when={relative() === 'departed'}>

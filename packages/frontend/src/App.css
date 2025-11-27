@@ -102,7 +102,7 @@ h2 {
 }
 
 .departure-item > * + * {
-	margin-top: 0.5rem;
+	margin-top: 0.25rem;
 }
 
 .departure-item-next {
@@ -118,23 +118,20 @@ h2 {
 
 .departure-time {
 	font-size: 1.5rem;
-	font-weight: 700;
+	font-weight: 800;
 }
 
-.departure-time > .delayed {
+.departure-time-meta {
 	font-size: 0.75rem;
 	font-weight: 500;
-	text-decoration: line-through;
 }
 
-.departed .departure-time > time {
-	color: #888888;
-	font-weight: 400;
+.strike {
 	text-decoration: line-through;
 }
 
 .relative-time {
-	font-size: 1rem;
+	font-size: 1.15rem;
 	color: #dadada;
 }
 
