@@ -1,45 +1,11 @@
-import type { Departure } from './types';
+import type { Departure, Recipe } from './types';
 
-// Set this to true to use dummy data for frontend development
+type APIEndpoint = `/api/trains` | `/api/recipes` | `/api/recipes/upload`;
 
-const dummyData: Departure[] = [
-	{
-		platform: '1',
-		direction: 'Flinders Street',
-		destination: 'Flinders Street',
-		scheduled_departure_utc: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-		estimated_departure_utc: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-	},
-	{
-		platform: '2',
-		direction: 'Sandringham',
-		destination: 'Sandringham',
-		scheduled_departure_utc: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-		estimated_departure_utc: new Date(Date.now() + 14 * 60 * 1000).toISOString(),
-	},
-	{
-		platform: '1',
-		direction: 'Flinders Street',
-		destination: 'Flinders Street',
-		scheduled_departure_utc: new Date(Date.now() + 25 * 60 * 1000).toISOString(),
-		estimated_departure_utc: null,
-	},
-];
-
-export async function fetchTrainData(): Promise<Departure[]> {
-	if (window.location.search.includes('d=true')) {
-		console.log('Using dummy data for train departures.');
-		return new Promise<Departure[]>((resolve) => {
-			setTimeout(() => {
-				resolve(dummyData);
-			}, 1000);
-		});
-	}
-
-	const response = await fetch('/api/trains');
-
+async function apiFetch<T>(endpoint: APIEndpoint, options?: RequestInit): Promise<T> {
+	const response = await fetch(endpoint, options);
 	if (!response.ok) {
-		throw new Error(`Could not fetch train data. Status: ${response.status}`);
+		throw new Error(`API request failed with status ${response.status}`);
 	}
 	try {
 		const data = await response.json();
@@ -47,4 +13,31 @@ export async function fetchTrainData(): Promise<Departure[]> {
 	} catch (e) {
 		throw new Error('Failed to parse train data.');
 	}
+}
+
+export async function fetchTrainData(): Promise<Departure[]> {
+	return apiFetch<Departure[]>('/api/trains');
+}
+
+export async function fetchRecipes(): Promise<Recipe[]> {
+	return apiFetch<Recipe[]>('/api/recipes');
+}
+
+export async function addRecipe(recipe: Omit<Recipe, 'id'>): Promise<Recipe> {
+	return apiFetch<Recipe>('/api/recipes', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify(recipe),
+	});
+}
+
+export async function uploadImage(file: File | Blob): Promise<string> {
+	const response = await apiFetch<{ key: string }>('/api/recipes/upload', {
+		method: 'PUT',
+		body: file,
+	});
+
+	return response.key;
 }

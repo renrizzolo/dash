@@ -96,7 +96,7 @@ async function buildPtvUrl(path: string, developerId: string, apiKey: string): P
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
-
+		console.log('Received request for:', url.pathname);
 		if (url.pathname === '/api/trains') {
 			try {
 				// check the cache first
@@ -159,6 +159,95 @@ export default {
 			} catch (error) {
 				console.error('Error fetching or processing train data:', error);
 				return new Response('Internal Server Error', { status: 500 });
+			}
+		}
+
+		if (url.pathname === '/api/recipes') {
+			if (request.method === 'GET') {
+				try {
+					const list = await env.RECIPES_KV.list({ prefix: 'recipe:' });
+					const recipes = [];
+					for (const key of list.keys) {
+						const value = await env.RECIPES_KV.get(key.name, 'json');
+						if (value) {
+							recipes.push(value);
+						}
+					}
+					return new Response(JSON.stringify(recipes), {
+						headers: { 'Content-Type': 'application/json' },
+					});
+				} catch (e) {
+					console.error('Error fetching recipes:', e);
+					return new Response('Error fetching recipes', { status: 500 });
+				}
+			}
+
+			if (request.method === 'POST') {
+				try {
+					const body = (await request.json()) as any;
+					const id = crypto.randomUUID();
+					const newRecipe = { ...body, id };
+					await env.RECIPES_KV.put(`recipe:${id}`, JSON.stringify(newRecipe));
+					return new Response(JSON.stringify(newRecipe), {
+						headers: { 'Content-Type': 'application/json' },
+						status: 201,
+					});
+				} catch (e) {
+					console.error('Error adding recipe:', e);
+					return new Response('Error adding recipe', { status: 500 });
+				}
+			}
+		}
+
+		if (url.pathname === '/api/recipes/upload' && request.method === 'PUT') {
+			try {
+				const key = crypto.randomUUID();
+				await env.RECIPES_BUCKET.put(key, request.body);
+				return new Response(JSON.stringify({ key }), {
+					headers: { 'Content-Type': 'application/json' },
+				});
+			} catch (e) {
+				console.error('Error uploading file:', e);
+				return new Response('Error uploading file', { status: 500 });
+			}
+		}
+
+		if (url.pathname.startsWith('/api/recipes/images/')) {
+			const key = url.pathname.split('/').pop();
+			if (!key) {
+				return new Response('Image key not found', { status: 400 });
+			}
+
+			const cacheUrl = new URL(request.url);
+			const cacheKey = new Request(cacheUrl.toString(), request);
+			const cache = caches.default;
+
+			let response = await cache.match(cacheKey);
+			if (response) {
+				return response;
+			}
+
+			try {
+				const object = await env.RECIPES_BUCKET.get(key);
+				if (!object) {
+					return new Response('Image not found', { status: 404 });
+				}
+
+				const headers = new Headers();
+				object.writeHttpMetadata(headers);
+				headers.set('etag', object.httpEtag);
+				headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+
+				response = new Response(object.body, {
+					headers,
+				});
+
+				ctx.waitUntil(cache.put(cacheKey, response.clone()));
+
+				return response;
+			} catch (e) {
+				console.error('Error fetching image:', e);
+				return new Response('Error fetching image', { status: 500 });
 			}
 		}
 
