@@ -8,6 +8,12 @@ export interface Recipe {
 	image?: string; // Key/URL of the uploaded image
 }
 
+export type RecipeParams = {
+	year: string | undefined;
+	month: string | undefined;
+	tag: string | undefined;
+};
+
 export interface Departure {
 	platform: string | null;
 	direction: string;

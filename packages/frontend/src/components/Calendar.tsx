@@ -3,15 +3,27 @@ import { addRecipe, uploadImage } from '../api';
 import { compressImage } from '../utils';
 import './Calendar.css';
 import type { Recipe } from '../types';
+import { LoadingBlip } from './Loading';
 
 interface CalendarProps {
-	recipes: Recipe[];
+	recipes: Recipe[] | undefined;
 	onRecipeAdded: () => void;
+	currentDate: Date;
+	onMonthChange: (date: Date) => void;
+	isLoading: boolean;
+	isFetching: boolean;
+	isError: boolean;
+}
+
+function toLocalDateString(date: Date) {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
 }
 
 export function Calendar(props: CalendarProps) {
-	const [currentDate, setCurrentDate] = createSignal(new Date());
-	const [selectedDate, setSelectedDate] = createSignal<Date | null>(new Date());
+	const [selectedDate, setSelectedDate] = createSignal<Date | null>(props.currentDate);
 	const [isAdding, setIsAdding] = createSignal(false);
 	const [newRecipeName, setNewRecipeName] = createSignal('');
 	const [newRecipeDesc, setNewRecipeDesc] = createSignal('');
@@ -19,26 +31,20 @@ export function Calendar(props: CalendarProps) {
 	const [newRecipeTags, setNewRecipeTags] = createSignal('');
 	const [newRecipeImage, setNewRecipeImage] = createSignal<File | null>(null);
 
-	const currentDateString = () => toLocalDateString(currentDate());
+	const currentDateString = () => toLocalDateString(props.currentDate);
 	const selectedDateString = () => (selectedDate() ? toLocalDateString(selectedDate()!) : null);
+	console.log(currentDateString(), selectedDateString());
 	const todayDateString = () => toLocalDateString(new Date());
 
-	const toLocalDateString = (date: Date) => {
-		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, '0');
-		const day = String(date.getDate()).padStart(2, '0');
-		return `${year}-${month}-${day}`;
-	};
-
 	const daysInMonth = () => {
-		const year = currentDate().getFullYear();
-		const month = currentDate().getMonth();
+		const year = props.currentDate.getFullYear();
+		const month = props.currentDate.getMonth();
 		return new Date(year, month + 1, 0).getDate();
 	};
 
 	const firstDayOfMonth = () => {
-		const year = currentDate().getFullYear();
-		const month = currentDate().getMonth();
+		const year = props.currentDate.getFullYear();
+		const month = props.currentDate.getMonth();
 		return new Date(year, month, 1).getDay();
 	};
 
@@ -48,19 +54,19 @@ export function Calendar(props: CalendarProps) {
 			daysArray.push(null);
 		}
 		for (let i = 1; i <= daysInMonth(); i++) {
-			daysArray.push(new Date(currentDate().getFullYear(), currentDate().getMonth(), i));
+			daysArray.push(new Date(props.currentDate.getFullYear(), props.currentDate.getMonth(), i));
 		}
 		return daysArray;
 	};
 
 	const getRecipesForDate = (date: Date) => {
 		const dateString = toLocalDateString(date);
-		return props.recipes.filter((r) => r.date === dateString);
+		return (props.recipes || []).filter((r) => r.date === dateString);
 	};
 
 	const goToToday = () => {
 		const today = new Date();
-		setCurrentDate(today);
+		props.onMonthChange(today);
 		setSelectedDate(today);
 	};
 
@@ -105,14 +111,29 @@ export function Calendar(props: CalendarProps) {
 	};
 
 	const changeMonth = (offset: number) => {
-		const newDate = new Date(currentDate());
+		const newDate = new Date(props.currentDate);
 		newDate.setMonth(newDate.getMonth() + offset);
-		setCurrentDate(newDate);
+		props.onMonthChange(newDate);
+		setSelectedDate(newDate);
 	};
 
 	return (
 		<>
 			<div class="card">
+				{props.isError && (
+					<div class="error">
+						Error loading recipes <br />
+						<button
+							type="button"
+							class="button"
+							onClick={() => {
+								void props.onRecipeAdded();
+							}}
+						>
+							Retry
+						</button>
+					</div>
+				)}
 				<div class="calendar-header calendar-grid">
 					<button type="button" class="button button-icon" onClick={() => changeMonth(-1)}>
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -123,8 +144,8 @@ export function Calendar(props: CalendarProps) {
 						</svg>
 					</button>
 					<span class="calendar-header-title">
-						{currentDate().toLocaleString('default', { month: 'long', year: 'numeric' })}{' '}
-						{selectedDateString() !== currentDateString() && (
+						{props.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+						{selectedDateString() !== todayDateString() && (
 							<button type="button" class="button button-icon" onClick={goToToday}>
 								<svg
 									width={16}
@@ -155,7 +176,7 @@ export function Calendar(props: CalendarProps) {
 						</svg>
 					</button>
 				</div>
-				<div class="calendar-grid">
+				<div class={`calendar-grid ${props.isLoading ? 'loading' : ''}`}>
 					<div class="day-name">Sun</div>
 					<div class="day-name">Mon</div>
 					<div class="day-name">Tue</div>
@@ -178,15 +199,98 @@ export function Calendar(props: CalendarProps) {
 							</button>
 						)}
 					</For>
+
+					<button
+						type="button"
+						class="button button-icon button-add-recipe"
+						aria-pressed={isAdding()}
+						onClick={() => setIsAdding(!isAdding())}
+					>
+						<Show
+							when={!isAdding()}
+							fallback={
+								<svg
+									data-slot="icon"
+									fill="none"
+									stroke-width="1.5"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg"
+									aria-hidden="true"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+								</svg>
+							}
+						>
+							<svg
+								data-slot="icon"
+								fill="none"
+								stroke-width="1.5"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+								aria-hidden="true"
+							>
+								<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+							</svg>
+						</Show>
+					</button>
+				</div>
+
+				<div class="calendar-loading-blip">
+					<LoadingBlip active={props.isFetching} />
 				</div>
 			</div>
-			<div class="card recipe-details">
+
+			<Show when={isAdding()}>
+				<form
+					onSubmit={(e) => {
+						void handleAdd(e);
+					}}
+					class="add-recipe-form"
+				>
+					<input
+						ref={(el) => {
+							setTimeout(() => el?.focus(), 0);
+						}}
+						type="text"
+						placeholder="Recipe Name"
+						aria-label="Recipe Name"
+						value={newRecipeName()}
+						onInput={(e) => setNewRecipeName(e.currentTarget.value)}
+						required
+					/>
+					<textarea placeholder="Description" value={newRecipeDesc()} onInput={(e) => setNewRecipeDesc(e.currentTarget.value)} />
+					<input
+						type="text"
+						placeholder="Tags (comma separated)"
+						aria-label="Tags"
+						value={newRecipeTags()}
+						onInput={(e) => setNewRecipeTags(e.currentTarget.value)}
+					/>
+					<input
+						type="url"
+						placeholder="URL"
+						aria-label="Recipe URL"
+						value={newRecipeUrl() || ''}
+						onInput={(e) => setNewRecipeUrl(e.currentTarget.value)}
+					/>
+					<input
+						type="file"
+						accept="image/*"
+						onChange={(e) => setNewRecipeImage(e.currentTarget.files ? e.currentTarget.files[0] : null)}
+					/>
+					<button type="submit" class="button">
+						Save
+					</button>
+				</form>
+			</Show>
+			<div class="recipe-details">
 				<Show when={selectedDate()}>
-					<h3>Recipes for {selectedDate()!.toLocaleDateString('en-GB')}</h3>
 					<div class="recipes-list">
 						<For each={getRecipesForDate(selectedDate()!)}>
 							{(recipe) => (
-								<div class="recipe-card">
+								<div class="card recipe-card">
 									<div class="recipe-card-content">
 										<h4>{recipe.name}</h4>
 										<p>{recipe.description}</p>
@@ -205,58 +309,7 @@ export function Calendar(props: CalendarProps) {
 								</div>
 							)}
 						</For>
-						<Show when={getRecipesForDate(selectedDate()!).length === 0}>
-							<p>No recipes for this date.</p>
-						</Show>
 					</div>
-
-					<button type="button" class="button" onClick={() => setIsAdding(!isAdding())}>
-						{isAdding() ? 'Cancel' : 'Add Recipe'}
-					</button>
-
-					<Show when={isAdding()}>
-						<form
-							onSubmit={(e) => {
-								void handleAdd(e);
-							}}
-							class="add-recipe-form"
-						>
-							<input
-								ref={(el) => {
-									setTimeout(() => el?.focus(), 0);
-								}}
-								type="text"
-								placeholder="Recipe Name"
-								aria-label="Recipe Name"
-								value={newRecipeName()}
-								onInput={(e) => setNewRecipeName(e.currentTarget.value)}
-								required
-							/>
-							<textarea placeholder="Description" value={newRecipeDesc()} onInput={(e) => setNewRecipeDesc(e.currentTarget.value)} />
-							<input
-								type="text"
-								placeholder="Tags (comma separated)"
-								aria-label="Tags"
-								value={newRecipeTags()}
-								onInput={(e) => setNewRecipeTags(e.currentTarget.value)}
-							/>
-							<input
-								type="url"
-								placeholder="URL"
-								aria-label="Recipe URL"
-								value={newRecipeUrl() || ''}
-								onInput={(e) => setNewRecipeUrl(e.currentTarget.value)}
-							/>
-							<input
-								type="file"
-								accept="image/*"
-								onChange={(e) => setNewRecipeImage(e.currentTarget.files ? e.currentTarget.files[0] : null)}
-							/>
-							<button type="submit" class="button">
-								Save
-							</button>
-						</form>
-					</Show>
 				</Show>
 			</div>
 		</>

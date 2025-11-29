@@ -21,7 +21,7 @@ type ApiReturnType<T extends APIEndpoint> = T extends '/api/trains'
 
 async function apiFetch<T extends APIEndpoint>(
 	endpoint: T,
-	searchParams?: Record<string, string | undefined>,
+	searchParams?: Record<string, string | number | undefined>,
 	options?: RequestInit
 ): Promise<ApiReturnType<T>> {
 	let params: URLSearchParams | null = null;
@@ -30,7 +30,7 @@ async function apiFetch<T extends APIEndpoint>(
 		params = new URLSearchParams();
 		Object.entries(searchParams).forEach(([key, value]) => {
 			if (value !== undefined) {
-				params!.append(key, value);
+				params!.append(key, value.toString());
 			}
 		});
 	}
@@ -50,7 +50,7 @@ export async function fetchTrainData() {
 	return apiFetch('/api/trains');
 }
 
-export async function fetchRecipes(searchParams?: { tag: string | undefined; month: string | undefined; year: string | undefined }) {
+export async function fetchRecipes(searchParams?: { tag: string | undefined; month: number | undefined; year: number | undefined }) {
 	return apiFetch('/api/recipes', searchParams, {
 		headers: {
 			'Cache-Control': 'no-cache',
