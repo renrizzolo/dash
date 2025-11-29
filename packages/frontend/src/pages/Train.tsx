@@ -35,7 +35,7 @@ export function Train() {
 						<h2>Balaclava station to City</h2>
 					</>
 				}
-				headerEnd={<span>Last updated: {countdown()}s ago</span>}
+				headerEnd={<span class="countdown">Last updated: {countdown()}s ago</span>}
 				content={
 					departures.error ? (
 						<div class="error">
@@ -50,7 +50,7 @@ export function Train() {
 							</button>
 						</div>
 					) : (
-						<TrainDepartures departures={departures()} dateTimeNow={dateTimeNow()} />
+						<TrainDepartures departures={departures()} dateTimeNow={dateTimeNow()} loading={departures.loading} />
 					)
 				}
 				footer={

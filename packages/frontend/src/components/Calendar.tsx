@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from 'solid-js';
+import { createSignal, createEffect, For, Show } from 'solid-js';
 import { addRecipe, uploadImage } from '../api';
 import { compressImage } from '../utils';
 import './Calendar.css';
@@ -31,11 +31,21 @@ export function Calendar(props: CalendarProps) {
 	const [newRecipeTags, setNewRecipeTags] = createSignal('');
 	const [newRecipeImage, setNewRecipeImage] = createSignal<File | null>(null);
 
-	const currentDateString = () => toLocalDateString(props.currentDate);
-	const selectedDateString = () => (selectedDate() ? toLocalDateString(selectedDate()!) : null);
-	console.log(currentDateString(), selectedDateString());
-	const todayDateString = () => toLocalDateString(new Date());
+	createEffect(() => {
+		const viewDate = props.currentDate;
+		const today = new Date();
+		const isCurrentMonth = viewDate.getFullYear() === today.getFullYear() && viewDate.getMonth() === today.getMonth();
 
+		if (isCurrentMonth) {
+			setSelectedDate(today);
+		} else {
+			setSelectedDate(viewDate);
+		}
+		// setIsAdding(false);
+	});
+
+	const todayDateString = () => toLocalDateString(new Date());
+	const selectedDateString = () => (selectedDate() ? toLocalDateString(selectedDate()!) : null);
 	const daysInMonth = () => {
 		const year = props.currentDate.getFullYear();
 		const month = props.currentDate.getMonth();
@@ -73,7 +83,7 @@ export function Calendar(props: CalendarProps) {
 	const handleDateClick = (date: Date | null) => {
 		if (date) {
 			setSelectedDate(date);
-			setIsAdding(false);
+			// setIsAdding(false);
 		}
 	};
 
@@ -114,7 +124,6 @@ export function Calendar(props: CalendarProps) {
 		const newDate = new Date(props.currentDate);
 		newDate.setMonth(newDate.getMonth() + offset);
 		props.onMonthChange(newDate);
-		setSelectedDate(newDate);
 	};
 
 	return (
@@ -249,37 +258,63 @@ export function Calendar(props: CalendarProps) {
 					}}
 					class="add-recipe-form"
 				>
-					<input
-						ref={(el) => {
-							setTimeout(() => el?.focus(), 0);
-						}}
-						type="text"
-						placeholder="Recipe Name"
-						aria-label="Recipe Name"
-						value={newRecipeName()}
-						onInput={(e) => setNewRecipeName(e.currentTarget.value)}
-						required
-					/>
-					<textarea placeholder="Description" value={newRecipeDesc()} onInput={(e) => setNewRecipeDesc(e.currentTarget.value)} />
-					<input
-						type="text"
-						placeholder="Tags (comma separated)"
-						aria-label="Tags"
-						value={newRecipeTags()}
-						onInput={(e) => setNewRecipeTags(e.currentTarget.value)}
-					/>
-					<input
-						type="url"
-						placeholder="URL"
-						aria-label="Recipe URL"
-						value={newRecipeUrl() || ''}
-						onInput={(e) => setNewRecipeUrl(e.currentTarget.value)}
-					/>
-					<input
-						type="file"
-						accept="image/*"
-						onChange={(e) => setNewRecipeImage(e.currentTarget.files ? e.currentTarget.files[0] : null)}
-					/>
+					<h3>Add New Recipe for {selectedDate()?.toLocaleDateString('en-GB')}</h3>
+					<div class="form-field">
+						<label for="recipe-name">Recipe name</label>
+						<input
+							id="recipe-name"
+							ref={(el) => {
+								setTimeout(() => el?.focus(), 0);
+							}}
+							type="text"
+							placeholder="Recipe Name"
+							aria-label="Recipe Name"
+							value={newRecipeName()}
+							onInput={(e) => setNewRecipeName(e.currentTarget.value)}
+							required
+						/>
+					</div>
+					<div class="form-field">
+						<label for="description">Description</label>
+						<textarea
+							id="description"
+							placeholder="Description"
+							value={newRecipeDesc()}
+							onInput={(e) => setNewRecipeDesc(e.currentTarget.value)}
+						/>
+					</div>
+					<div class="form-field">
+						<label for="tags">Tags (comma separated)</label>
+						<input
+							id="tags"
+							type="text"
+							placeholder="Tags (comma separated)"
+							aria-label="Tags"
+							value={newRecipeTags()}
+							onInput={(e) => setNewRecipeTags(e.currentTarget.value)}
+						/>
+					</div>
+					<div class="form-field">
+						<label for="url">Recipe URL</label>
+
+						<input
+							type="url"
+							placeholder="URL"
+							aria-label="Recipe URL"
+							value={newRecipeUrl() || ''}
+							onInput={(e) => setNewRecipeUrl(e.currentTarget.value)}
+						/>
+					</div>
+					<div class="form-field">
+						<label for="image">Recipe Image</label>
+						<input
+							id="image"
+							type="file"
+							accept="image/*"
+							onChange={(e) => setNewRecipeImage(e.currentTarget.files ? e.currentTarget.files[0] : null)}
+						/>
+					</div>
+
 					<button type="submit" class="button">
 						Save
 					</button>

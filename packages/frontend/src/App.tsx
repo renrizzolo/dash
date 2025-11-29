@@ -5,7 +5,7 @@ function App(props: RouteSectionProps) {
 	return (
 		<div class="app-container">
 			<nav>
-				<A href="/recipes">Recipes</A> | <A href="/train">Train</A>
+				<A href="/recipes">Recipes</A> <A href="/train">Train</A>
 			</nav>
 			<main class="main">{props.children}</main>
 		</div>

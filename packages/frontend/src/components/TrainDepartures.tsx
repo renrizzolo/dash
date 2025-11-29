@@ -5,6 +5,7 @@ import type { Departure } from '../types';
 interface TrainDeparturesProps {
 	departures: Departure[] | undefined;
 	dateTimeNow: Date;
+	loading?: boolean;
 }
 
 const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
@@ -34,10 +35,22 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 	};
 
 	return (
-		<div class="train-departures-grid">
+		<div class={'train-departures-grid ' + (props.loading ? 'loading' : '')}>
 			<Switch fallback={<p>Loading departures...</p>}>
 				<Match when={props.departures === undefined}>
-					<p>Loading departures...</p>
+					{Array.from({ length: 10 }).map(() => (
+						<div class="departure-item">
+							<div class="departure-info">
+								<span class="departure-time-meta">&nbsp;</span>
+								<span>&nbsp;</span>
+							</div>
+							<div class="departure-info">
+								<span class="departure-time">
+									<time>&nbsp;</time>
+								</span>
+							</div>
+						</div>
+					))}
 				</Match>
 				<Match when={props.departures && props.departures.length === 0}>
 					<p>No upcoming departures found.</p>

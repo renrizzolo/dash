@@ -103,10 +103,14 @@ export default {
 				try {
 					const tag = url.searchParams.get('tag');
 					const month = url.searchParams.get('month');
+					const year = url.searchParams.get('year');
+					if (month && !year) {
+						return new Response('Year parameter is required when month is specified', { status: 400 });
+					}
 
 					let prefix = 'recipe:';
-					if (month) {
-						prefix += month;
+					if (month && year) {
+						prefix += `${year}-${month}`;
 					}
 
 					console.log('Fetching recipes with prefix:', prefix);
@@ -123,7 +127,7 @@ export default {
 								matches = false;
 							}
 
-							if (month && !value.date.startsWith(month)) {
+							if (year && !value.date.startsWith(year)) {
 								throw new Error('Date / prefix mismatch');
 							}
 
