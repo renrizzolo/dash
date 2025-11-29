@@ -1,70 +1,5 @@
-interface PTVDeparture {
-	stop_id: number;
-	route_id: number;
-	run_id: number;
-	direction_id: number;
-	scheduled_departure_utc: string;
-	estimated_departure_utc: string | null;
-	at_platform: boolean;
-	platform_number: string;
-	flags: string;
-	route_type: number;
-	line_id: number;
-}
-
-interface PTVDirection {
-	direction_id: number;
-	direction_name: string;
-	route_type: number;
-}
-
-interface PTVRun {
-	run_id: number;
-	route_id: number;
-	direction_id: number;
-	destination_name: string;
-	express_stop_count: number;
-	vehicle_descriptor: any;
-}
-
-interface PTVRoute {
-	route_id: number;
-	route_name: string;
-	route_number: string;
-	route_type: number;
-}
-
-interface PTVStop {
-	stop_id: number;
-	stop_name: string;
-	stop_latitude: number;
-	stop_longitude: number;
-	route_type: number;
-	station_type: string;
-	stop_suburb: string;
-}
-
-interface PTVDisruption {}
-
-interface PTVDeparturesResponse {
-	departures: PTVDeparture[];
-	directions: Record<string, PTVDirection>;
-	runs: Record<string, PTVRun>;
-	routes: Record<string, PTVRoute>;
-	stops: Record<string, PTVStop>;
-	disruptions: PTVDisruption[];
-	status: {
-		version: string;
-		health: {
-			database: boolean;
-			memcache: boolean;
-			geocoder: boolean;
-			gtfs: boolean;
-			rt: boolean;
-			security_token: boolean;
-		};
-	};
-}
+import { apiRoutes } from '../src/api';
+import { type Recipe, type PTVDeparturesResponse } from '../src/types';
 
 // Helper function to build PTV API URL with signature
 async function buildPtvUrl(path: string, developerId: string, apiKey: string): Promise<string> {
@@ -97,7 +32,8 @@ export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
 		console.log('Received request for:', url.pathname);
-		if (url.pathname === '/api/trains') {
+
+		if (url.pathname === apiRoutes.trainDepartures) {
 			try {
 				// check the cache first
 				const cacheUrl = new URL(request.url);
@@ -162,17 +98,41 @@ export default {
 			}
 		}
 
-		if (url.pathname === '/api/recipes') {
+		if (url.pathname === apiRoutes.recipes) {
 			if (request.method === 'GET') {
 				try {
-					const list = await env.RECIPES_KV.list({ prefix: 'recipe:' });
+					const tag = url.searchParams.get('tag');
+					const month = url.searchParams.get('month');
+
+					let prefix = 'recipe:';
+					if (month) {
+						prefix += month;
+					}
+
+					console.log('Fetching recipes with prefix:', prefix);
+
+					const list = await env.RECIPES_KV.list({ prefix });
 					const recipes = [];
+
 					for (const key of list.keys) {
-						const value = await env.RECIPES_KV.get(key.name, 'json');
+						const value = await env.RECIPES_KV.get<Recipe>(key.name, 'json');
 						if (value) {
-							recipes.push(value);
+							let matches = true;
+
+							if (tag && (!value.tags || !value.tags.includes(tag))) {
+								matches = false;
+							}
+
+							if (month && !value.date.startsWith(month)) {
+								throw new Error('Date / prefix mismatch');
+							}
+
+							if (matches) {
+								recipes.push(value);
+							}
 						}
 					}
+
 					return new Response(JSON.stringify(recipes), {
 						headers: { 'Content-Type': 'application/json' },
 					});
@@ -184,10 +144,15 @@ export default {
 
 			if (request.method === 'POST') {
 				try {
-					const body = (await request.json()) as any;
+					const body = await request.json<Omit<Recipe, 'id'>>();
 					const id = crypto.randomUUID();
+
 					const newRecipe = { ...body, id };
-					await env.RECIPES_KV.put(`recipe:${id}`, JSON.stringify(newRecipe));
+
+					const key = newRecipe.date ? `recipe:${newRecipe.date}:${id}` : `recipe:${id}`;
+
+					await env.RECIPES_KV.put(key, JSON.stringify(newRecipe));
+
 					return new Response(JSON.stringify(newRecipe), {
 						headers: { 'Content-Type': 'application/json' },
 						status: 201,
@@ -199,10 +164,16 @@ export default {
 			}
 		}
 
-		if (url.pathname === '/api/recipes/upload' && request.method === 'PUT') {
+		if (url.pathname === apiRoutes.recipeUpload && request.method === 'PUT') {
 			try {
 				const key = crypto.randomUUID();
-				await env.RECIPES_BUCKET.put(key, request.body);
+				const contentType = request.headers.get('Content-Type');
+
+				await env.RECIPES_BUCKET.put(key, request.body, {
+					httpMetadata: {
+						contentType: contentType?.toString(),
+					},
+				});
 				return new Response(JSON.stringify({ key }), {
 					headers: { 'Content-Type': 'application/json' },
 				});
@@ -212,10 +183,10 @@ export default {
 			}
 		}
 
-		if (url.pathname.startsWith('/api/recipes/images/')) {
+		if (url.pathname.startsWith(apiRoutes.recipeImage)) {
 			const key = url.pathname.split('/').pop();
 			if (!key) {
-				return new Response('Image key not found', { status: 400 });
+				return new Response('Image not found', { status: 400 });
 			}
 
 			const cacheUrl = new URL(request.url);
@@ -235,7 +206,7 @@ export default {
 
 				const headers = new Headers();
 				object.writeHttpMetadata(headers);
-				headers.set('etag', object.httpEtag);
+
 				headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
 
 				response = new Response(object.body, {

@@ -1,8 +1,8 @@
 import { createSignal, For, Show } from 'solid-js';
 import { addRecipe, uploadImage } from '../api';
 import { compressImage } from '../utils';
-import { type Recipe } from '../types';
 import './Calendar.css';
+import type { Recipe } from '../types';
 
 interface CalendarProps {
 	recipes: Recipe[];
@@ -18,6 +18,10 @@ export function Calendar(props: CalendarProps) {
 	const [newRecipeUrl, setNewRecipeUrl] = createSignal<string | null>(null);
 	const [newRecipeTags, setNewRecipeTags] = createSignal('');
 	const [newRecipeImage, setNewRecipeImage] = createSignal<File | null>(null);
+
+	const currentDateString = () => toLocalDateString(currentDate());
+	const selectedDateString = () => (selectedDate() ? toLocalDateString(selectedDate()!) : null);
+	const todayDateString = () => toLocalDateString(new Date());
 
 	const toLocalDateString = (date: Date) => {
 		const year = date.getFullYear();
@@ -109,11 +113,8 @@ export function Calendar(props: CalendarProps) {
 	return (
 		<>
 			<div class="card">
-				<button type="button" class="button" onClick={goToToday}>
-					Today
-				</button>
 				<div class="calendar-header calendar-grid">
-					<button type="button" class="button" onClick={() => changeMonth(-1)}>
+					<button type="button" class="button button-icon" onClick={() => changeMonth(-1)}>
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
 							<path
 								fill-rule="evenodd"
@@ -121,8 +122,31 @@ export function Calendar(props: CalendarProps) {
 							/>
 						</svg>
 					</button>
-					<span class="calendar-header-title">{currentDate().toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-					<button type="button" class="button" onClick={() => changeMonth(1)}>
+					<span class="calendar-header-title">
+						{currentDate().toLocaleString('default', { month: 'long', year: 'numeric' })}{' '}
+						{selectedDateString() !== currentDateString() && (
+							<button type="button" class="button button-icon" onClick={goToToday}>
+								<svg
+									width={16}
+									height={16}
+									data-slot="icon"
+									fill="none"
+									stroke-width="1.5"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg"
+									aria-hidden="true"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z"
+									></path>
+								</svg>
+							</button>
+						)}
+					</span>
+					<button type="button" class="button button-icon" onClick={() => changeMonth(1)}>
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
 							<path
 								fill-rule="evenodd"
@@ -144,9 +168,9 @@ export function Calendar(props: CalendarProps) {
 							<button
 								type="button"
 								tabindex={!day ? -1 : undefined}
-								class={`calendar-day ${
-									day && selectedDate() && toLocalDateString(day) === toLocalDateString(selectedDate()!) ? 'selected' : ''
-								} ${day ? '' : 'empty'}`}
+								class={`calendar-day ${day && selectedDateString() && toLocalDateString(day) === selectedDateString() ? 'selected ' : ''}${
+									day && toLocalDateString(day) === todayDateString() ? 'today ' : ''
+								}${day ? '' : 'empty'}`}
 								onClick={() => handleDateClick(day)}
 							>
 								{day ? day.getDate() : ''}
@@ -191,7 +215,12 @@ export function Calendar(props: CalendarProps) {
 					</button>
 
 					<Show when={isAdding()}>
-						<form onSubmit={handleAdd} class="add-recipe-form">
+						<form
+							onSubmit={(e) => {
+								void handleAdd(e);
+							}}
+							class="add-recipe-form"
+						>
 							<input
 								ref={(el) => {
 									setTimeout(() => el?.focus(), 0);

@@ -11,12 +11,12 @@ export function Train() {
 	const [dateTimeNow, setDateTimeNow] = createSignal(new Date());
 
 	onMount(() => {
-		const countdownInterval = setInterval(() => {
+		const countdownInterval = setInterval(async () => {
 			setCountdown((prev) => (prev < REFRESH_INTERVAL_SECONDS ? prev + 1 : 0));
 			setDateTimeNow(new Date());
 
 			if (countdown() === REFRESH_INTERVAL_SECONDS) {
-				refetch();
+				await refetch();
 				setCountdown(0);
 			}
 		}, 1000);
@@ -40,7 +40,12 @@ export function Train() {
 					departures.error ? (
 						<div class="error">
 							Error: {departures.error?.message} <br />
-							<button type="button" onClick={() => refetch()}>
+							<button
+								type="button"
+								onClick={() => {
+									void refetch();
+								}}
+							>
 								Retry
 							</button>
 						</div>

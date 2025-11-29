@@ -40,6 +40,12 @@ h6 {
 	border-radius: 6px;
 }
 
+.button-icon {
+	width: 36px;
+	height: 36px;
+	padding: 8px;
+}
+
 .button:hover {
 	background-color: #f0f0f0;
 }
@@ -52,19 +58,23 @@ h6 {
 	font-weight: bold;
 }
 
-.calendar-header .button {
-	aspect-ratio: 1/1;
+.calendar-header :last-child {
+	justify-self: end;
 }
 
 .calendar-header-title {
 	grid-column: span 5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
 }
 
 .calendar-grid {
 	font-family: monospace;
 	display: grid;
 	grid-template-columns: repeat(7, 1fr);
-	gap: 6px;
+	gap: 8px;
 	width: 100%;
 }
 
@@ -79,7 +89,7 @@ h6 {
 	border-radius: 8px;
 	background-color: #333;
 	color: #fff;
-	padding: 10px;
+	padding: 0;
 	aspect-ratio: 1/1;
 	text-align: center;
 	cursor: pointer;
@@ -95,6 +105,10 @@ h6 {
 	font-weight: bold;
 	outline: 2px solid #474747;
 	outline-offset: 2px;
+}
+
+.calendar-day.today {
+	border: 2px dashed #ffffff;
 }
 
 .calendar-day:hover {

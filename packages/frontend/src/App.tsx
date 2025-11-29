@@ -1,13 +1,14 @@
 import './App.css';
-import { Recipes } from './pages/Recipes';
-import { Train } from './pages/Train';
+import { A, type RouteSectionProps } from '@solidjs/router';
 
-function App() {
+function App(props: RouteSectionProps) {
 	return (
-		<main class="main">
-			{/* <Train /> */}
-			<Recipes />
-		</main>
+		<div class="app-container">
+			<nav>
+				<A href="/recipes">Recipes</A> | <A href="/train">Train</A>
+			</nav>
+			<main class="main">{props.children}</main>
+		</div>
 	);
 }
 

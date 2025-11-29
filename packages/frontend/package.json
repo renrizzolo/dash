@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc -b && vite build",
+		"type-check": "tsc -b",
 		"preview": "npm run build && vite preview",
 		"deploy": "npm run build && wrangler deploy",
 		"worker:dev": "wrangler dev --env dev",
@@ -14,17 +15,19 @@
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
+		"@solidjs/router": "^0.15.4",
+		"@tanstack/solid-query": "^5.90.14",
 		"@vitejs/plugin-legacy": "^7.2.1",
 		"solid-js": "^1.9.10"
 	},
 	"devDependencies": {
-		"wrangler": "^4.50.0",
 		"@cloudflare/vite-plugin": "^1.15.2",
+		"@cloudflare/workers-types": "^4.20251126.0",
 		"@types/node": "^24.10.1",
 		"terser": "^5.44.1",
 		"typescript": "~5.9.3",
 		"vite": "^7.2.4",
-		"@cloudflare/workers-types": "^4.20251126.0",
-		"vite-plugin-solid": "^2.11.10"
+		"vite-plugin-solid": "^2.11.10",
+		"wrangler": "^4.50.0"
 	}
 }
