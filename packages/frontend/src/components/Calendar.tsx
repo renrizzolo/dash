@@ -1,3 +1,5 @@
+// TODO - solid doesn't accept htmlFor
+// oxlint-disable label-has-associated-control
 import { createSignal, createEffect, For, Show } from 'solid-js';
 import { addRecipe, uploadImage } from '../api';
 import { compressImage } from '../utils';
