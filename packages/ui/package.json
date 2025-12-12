@@ -1,0 +1,36 @@
+{
+	"name": "ui",
+	"private": true,
+	"version": "0.0.0",
+	"description": "",
+	"type": "module",
+	"license": "MIT",
+	"scripts": {
+		"start": "vite",
+		"dev": "vite",
+		"type-check": "tsc --noEmit"
+	},
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"files": [
+		"src"
+	],
+	"devDependencies": {
+		"@iconify-json/tabler": "^1.2.23",
+		"unocss": "^66.5.9",
+		"@unocss/preset-icons": "^66.5.9",
+		"@unocss/preset-mini": "^66.5.9",
+		"@unocss/preset-web-fonts": "^66.5.9",
+		"@unocss/transformer-variant-group": "^66.5.9",
+		"@unocss/vite": "^66.5.9",
+		"solid-devtools": "^0.34.4",
+		"typescript": "^5.9.2",
+		"vite": "^7.2.4",
+		"vite-plugin-solid": "^2.11.10"
+	},
+	"dependencies": {
+		"@unocss/reset": "^66.5.9",
+		"solid-js": "^1.9.9"
+	}
+}

@@ -18,14 +18,18 @@
 		"@solidjs/router": "^0.15.4",
 		"@tanstack/solid-query": "^5.90.14",
 		"@vitejs/plugin-legacy": "^7.2.1",
-		"solid-js": "^1.9.10"
+		"solid-js": "^1.9.10",
+		"ui": "workspace:*"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.15.2",
 		"@cloudflare/workers-types": "^4.20251126.0",
 		"@types/node": "^24.10.1",
+		"@unocss/reset": "^66.5.9",
+		"@unocss/vite": "^66.5.9",
 		"terser": "^5.44.1",
 		"typescript": "~5.9.3",
+		"unocss": "^66.5.9",
 		"vite": "^7.2.4",
 		"vite-plugin-solid": "^2.11.10",
 		"wrangler": "^4.50.0"
