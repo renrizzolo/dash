@@ -1,1 +1,1 @@
-export { presetDash } from './styles/preset';
+export { TabLink } from './components/tab';

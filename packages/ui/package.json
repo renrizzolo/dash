@@ -11,7 +11,8 @@
 		"type-check": "tsc --noEmit"
 	},
 	"exports": {
-		".": "./src/index.ts"
+		"./components": "./src/index.ts",
+		"./preset": "./src/styles/preset.ts"
 	},
 	"files": [
 		"src"
@@ -31,6 +32,7 @@
 	},
 	"dependencies": {
 		"@unocss/reset": "^66.5.9",
-		"solid-js": "^1.9.9"
+		"solid-js": "^1.9.10",
+		"@solidjs/router": "^0.15.4"
 	}
 }
