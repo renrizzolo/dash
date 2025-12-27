@@ -1,11 +1,13 @@
 import './App.css';
-import { A, type RouteSectionProps } from '@solidjs/router';
+import { type RouteSectionProps } from '@solidjs/router';
+import { TabLink } from 'ui/components';
 
 function App(props: RouteSectionProps) {
 	return (
-		<div class="app-container bg-background stack-center-4">
-			<nav>
-				<A href="/recipes">Recipes</A> <A href="/train">Train</A>
+		<div class="font-sans app-container bg-background stack-center-4">
+			<nav class="flex-row gap-4 mb-8">
+				<TabLink href="/recipes">Recipes</TabLink>
+				<TabLink href="/train">Train</TabLink>
 			</nav>
 			<main class="main">{props.children}</main>
 		</div>
