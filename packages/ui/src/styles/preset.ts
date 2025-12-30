@@ -88,6 +88,15 @@ export const presetDash = () => [
 					'56': '14rem',
 					'64': '16rem',
 				},
+				size: {
+					container: '600px',
+					fit: 'fit-content',
+					min: 'min-content',
+					max: 'max-content',
+					full: '100%',
+					vw: '100vw',
+					vh: '100vh',
+				},
 			},
 			rules: [
 				// Layout
@@ -131,19 +140,15 @@ export const presetDash = () => [
 				[/^grid-cols-auto-(.+)$/, ([, size]) => ({ 'grid-template-columns': `repeat(auto-fit, minmax(${size}, 1fr))` })],
 
 				// Sizing
-				['w-full', { width: '100%' }],
-				['h-full', { height: '100%' }],
-				['w-screen', { width: '100vw' }],
-				['h-screen', { height: '100vh' }],
 				['min-h-screen', { 'min-height': '100vh' }],
-				['w-min', { width: 'min-content' }],
-				['h-max', { height: 'max-content' }],
-				['w-auto', { width: 'auto' }],
-				['h-auto', { height: 'auto' }],
 
-				[/^w-(\d+)$/, ([, d], { theme }) => ({ width: theme.spacing?.[d as keyof typeof theme.spacing] })],
-				[/^h-(\d+)$/, ([, d], { theme }) => ({ height: theme.spacing?.[d as keyof typeof theme.spacing] })],
-				[/^max-w-(\d+)$/, ([, d], { theme }) => ({ 'max-width': theme.spacing?.[d as keyof typeof theme.spacing] })],
+				[/^w-(.*)/, ([, d], { theme }) => ({ width: theme.size?.[d as keyof typeof theme.size] || d })],
+				[/^min-w-(\d+)$/, ([, d], { theme }) => ({ 'min-width': theme.size?.[d as keyof typeof theme.size] })],
+				[/^max-w-(\d+)$/, ([, d], { theme }) => ({ 'max-width': theme.size?.[d as keyof typeof theme.size] })],
+
+				[/^h-(\d+)$/, ([, d], { theme }) => ({ height: theme.size?.[d as keyof typeof theme.size] })],
+				[/^min-h-(\d+)$/, ([, d], { theme }) => ({ 'min-height': theme.size?.[d as keyof typeof theme.size] })],
+				[/^max-h-(\d+)$/, ([, d], { theme }) => ({ 'max-height': theme.size?.[d as keyof typeof theme.size] })],
 
 				// Positioning
 				['absolute', { position: 'absolute' }],
@@ -379,11 +384,6 @@ export const presetDash = () => [
 				['rounded-2xl', { 'border-radius': '1rem' }],
 				['rounded-full', { 'border-radius': '9999px' }],
 				[
-					/^rounded-(\d+)$/,
-					([, size], { theme }) => ({ 'border-radius': theme.spacing?.[size as keyof typeof theme.spacing] || size + 'rem' }),
-				],
-
-				[
 					/^border-(.+)/,
 					([, c], { theme }) => {
 						if (theme.colors.border?.[c as keyof typeof theme.colors.border]) {
@@ -420,9 +420,9 @@ export const presetDash = () => [
 
 			shortcuts: [
 				[
-					/^stack-(center|start|end)-(\d+)$/,
-					([, alignment, size]) => `flex-col items-${alignment} justify-${alignment} gap-${size}`,
-					{ autocomplete: ['stack-center-$spacing', 'stack-start-$spacing', 'stack-end-$spacing'] },
+					/^stack-(center|start|end|justify)-(\d+)$/,
+					([, alignment, size]) => `flex-col items-${alignment} gap-${size}`,
+					{ autocomplete: ['stack-center-$spacing', 'stack-start-$spacing', 'stack-end-$spacing', 'stack-justify-$spacing'] },
 				],
 			],
 
