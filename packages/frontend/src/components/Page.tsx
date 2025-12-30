@@ -13,13 +13,12 @@ export function Page({
 }) {
 	return (
 		<>
-			{headerStart ||
-				(headerEnd && (
-					<header class="header">
-						{headerStart && <div class="header-start">{headerStart}</div>}
-						{headerEnd && <div class="header-end">{headerEnd}</div>}
-					</header>
-				))}
+			{(headerStart || headerEnd) && (
+				<header class="flex-row justify-between items-end mb-4">
+					{headerStart && <div class="stack-start-1 text-left">{headerStart}</div>}
+					{headerEnd && <div class="stack-end-1">{headerEnd}</div>}
+				</header>
+			)}
 			<section>{content}</section>
 			{footer && <footer>{footer}</footer>}
 		</>
