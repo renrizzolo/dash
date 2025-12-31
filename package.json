@@ -4,9 +4,16 @@
 	"private": true,
 	"scripts": {
 		"dev": "pnpm --filter frontend dev",
+		"lint": "oxlint --type-aware",
 		"deploy": "pnpm --filter frontend run deploy"
 	},
+	"lint-staged": {
+		"**/*.{js,mjs,cjs,jsx,ts,tsx}": "oxlint"
+	},
 	"devDependencies": {
-		"typescript": "^5.5.2"
+		"lint-staged": "^16.2.7",
+		"oxlint": "^1.30.0",
+		"oxlint-tsgolint": "^0.8.3",
+		"typescript": "^5.9.3"
 	}
 }

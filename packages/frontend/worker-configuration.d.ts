@@ -8,6 +8,8 @@ declare namespace Cloudflare {
 	interface Env {
 		PTV_DEVELOPER_ID: string;
 		PTV_API_KEY: string;
+		RECIPES_KV: KVNamespace;
+		RECIPES_BUCKET: R2Bucket;
 	}
 }
 interface Env extends Cloudflare.Env {}

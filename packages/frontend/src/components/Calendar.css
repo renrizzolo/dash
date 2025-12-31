@@ -1,0 +1,289 @@
+* {
+	box-sizing: border-box;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 0;
+	padding: 0;
+}
+
+.card {
+	position: relative;
+	max-width: 600px;
+	margin: 0 auto;
+	font-family: sans-serif;
+	background-color: #fdfdfd;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 6px 28px rgba(0, 0, 0, 0.07);
+	padding: 20px;
+	border-radius: 16px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 20px;
+}
+
+.button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: white;
+	border: none;
+	cursor: pointer;
+	font-size: 1rem;
+	padding: 8px 12px;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+}
+
+.button-icon {
+	width: 36px;
+	height: 36px;
+	padding: 8px;
+}
+
+.button:hover {
+	background-color: #f0f0f0;
+}
+
+.calendar-header {
+	align-items: center;
+	font-family: monospace;
+	margin-bottom: 10px;
+	font-size: 1.2rem;
+	font-weight: bold;
+}
+
+.calendar-header :last-child {
+	justify-self: end;
+}
+
+.calendar-header-title {
+	grid-column: span 5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+.calendar-grid {
+	font-family: monospace;
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 8px;
+	width: 100%;
+	position: relative;
+}
+
+.day-name {
+	text-align: center;
+	font-weight: bold;
+	padding: 5px;
+}
+
+.calendar-day {
+	border: none;
+	border-radius: 8px;
+	background-color: #333;
+	color: #fff;
+	padding: 0;
+	aspect-ratio: 1/1;
+	text-align: center;
+	cursor: pointer;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.calendar-day:focus-visible,
+.calendar-day.selected {
+	font-weight: bold;
+	outline: 2px solid #474747;
+	outline-offset: 2px;
+}
+
+.calendar-day.today {
+	border: 2px dashed #ffffff;
+}
+
+.calendar-day:hover {
+	background-color: #000;
+	color: #f0f0f0;
+}
+
+.calendar-day.selected {
+	background-color: #5b5b5b;
+}
+
+.calendar-day.empty {
+	background-color: transparent;
+	border: none;
+	cursor: default;
+}
+
+.calendar-loading-blip {
+	position: absolute;
+	inset-inline-end: 8px;
+	inset-block-end: 8px;
+}
+
+.dot {
+	width: 6px;
+	height: 6px;
+	background-color: #ff5722;
+	border-radius: 50%;
+	margin-top: 4px;
+}
+
+.button-add-recipe {
+	align-self: center;
+	justify-self: center;
+	grid-column: 7;
+	border-radius: 999px;
+	transition: all 0.15s ease;
+	bottom: -38px;
+	position: absolute;
+}
+
+.button-add-recipe[aria-pressed='true'] {
+	background-color: #000;
+	color: #fff;
+	bottom: -74px;
+}
+
+.recipe-details {
+	padding-top: 32px;
+}
+
+.recipes-list {
+	width: 100%;
+}
+
+.recipe-card {
+	margin-bottom: 24px;
+	background: white;
+	text-align: left;
+	align-items: start;
+	animation: fade-in 0.3s ease-in-out;
+}
+
+.recipe-card-content {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.recipe-image {
+	max-width: 100%;
+	height: auto;
+	object-fit: cover;
+	aspect-ratio: 1 / 1;
+	border-radius: 4px;
+}
+
+.tags {
+	margin-top: auto;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.tag {
+	background-color: #eee;
+	padding: 2px 6px;
+	border-radius: 4px;
+	font-size: 0.8em;
+}
+
+.add-recipe-form {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	margin-top: 36px;
+	animation: fade-in 0.3s ease-in-out;
+}
+
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.form-field {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	align-items: start;
+}
+
+.add-recipe-form label {
+	font-weight: 600;
+	font-size: 0.9em;
+	color: #313131;
+}
+
+.add-recipe-form input,
+.add-recipe-form textarea {
+	padding: 16px 18px;
+	border: 1px solid #333;
+	border-radius: 6px;
+	width: 100%;
+	background: #fafafa;
+}
+
+.add-recipe-form textarea {
+	field-sizing: content;
+	min-height: 100px;
+}
+
+.add-recipe-form button {
+	padding: 16px 18px;
+	background-color: #333;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.add-recipe-form button:hover {
+	background-color: #000;
+}
+
+.calendar-grid.loading {
+	position: relative;
+	pointer-events: none;
+}
+
+.calendar-grid.loading::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 100%);
+	background-size: 200% 100%;
+	animation: skeleton-loading 1.5s infinite;
+	z-index: 10;
+	border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}

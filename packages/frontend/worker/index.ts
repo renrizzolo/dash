@@ -1,70 +1,5 @@
-interface PTVDeparture {
-	stop_id: number;
-	route_id: number;
-	run_id: number;
-	direction_id: number;
-	scheduled_departure_utc: string;
-	estimated_departure_utc: string | null;
-	at_platform: boolean;
-	platform_number: string;
-	flags: string;
-	route_type: number;
-	line_id: number;
-}
-
-interface PTVDirection {
-	direction_id: number;
-	direction_name: string;
-	route_type: number;
-}
-
-interface PTVRun {
-	run_id: number;
-	route_id: number;
-	direction_id: number;
-	destination_name: string;
-	express_stop_count: number;
-	vehicle_descriptor: any;
-}
-
-interface PTVRoute {
-	route_id: number;
-	route_name: string;
-	route_number: string;
-	route_type: number;
-}
-
-interface PTVStop {
-	stop_id: number;
-	stop_name: string;
-	stop_latitude: number;
-	stop_longitude: number;
-	route_type: number;
-	station_type: string;
-	stop_suburb: string;
-}
-
-interface PTVDisruption {}
-
-interface PTVDeparturesResponse {
-	departures: PTVDeparture[];
-	directions: Record<string, PTVDirection>;
-	runs: Record<string, PTVRun>;
-	routes: Record<string, PTVRoute>;
-	stops: Record<string, PTVStop>;
-	disruptions: PTVDisruption[];
-	status: {
-		version: string;
-		health: {
-			database: boolean;
-			memcache: boolean;
-			geocoder: boolean;
-			gtfs: boolean;
-			rt: boolean;
-			security_token: boolean;
-		};
-	};
-}
+import { apiRoutes } from '../src/api';
+import { type Recipe, type PTVDeparturesResponse } from '../src/types';
 
 // Helper function to build PTV API URL with signature
 async function buildPtvUrl(path: string, developerId: string, apiKey: string): Promise<string> {
@@ -93,11 +28,36 @@ async function buildPtvUrl(path: string, developerId: string, apiKey: string): P
 	return `${baseUrl}${requestMessage}&signature=${signature}`;
 }
 
+function getAuthFromRequest(request: Request): string | null {
+	const cookieHeader = request.headers.get('Cookie');
+	if (!cookieHeader) return null;
+
+	const cookies = cookieHeader.split(';').map((c) => c.trim());
+	const authCookie = cookies.find((c) => c.startsWith('CF_Authorization='));
+	if (!authCookie) return null;
+
+	const jwt = authCookie.split('=')[1];
+	try {
+		// index 1 is the payload
+		const payload = JSON.parse(atob(jwt.split('.')[1]));
+
+		if (payload.exp < Date.now() / 1000) {
+			console.warn('JWT has expired');
+			return null;
+		}
+		return payload.email;
+	} catch (e) {
+		console.error('Failed to parse JWT', e);
+		return null;
+	}
+}
+
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
+		console.log('Received request for:', url.pathname);
 
-		if (url.pathname === '/api/trains') {
+		if (url.pathname === apiRoutes.trainDepartures) {
 			try {
 				// check the cache first
 				const cacheUrl = new URL(request.url);
@@ -159,6 +119,154 @@ export default {
 			} catch (error) {
 				console.error('Error fetching or processing train data:', error);
 				return new Response('Internal Server Error', { status: 500 });
+			}
+		}
+
+		if (url.pathname === apiRoutes.auth) {
+			const email = getAuthFromRequest(request);
+			if (email) {
+				return new Response(JSON.stringify({ email }), {
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
+			if (import.meta.env.DEV) {
+				return new Response(JSON.stringify({ email: 'dev' }), { headers: { 'Content-Type': 'application/json' } });
+			}
+
+			return new Response('Unauthorized', { status: 401 });
+		}
+
+		if (url.pathname === apiRoutes.recipes) {
+			if (request.method === 'GET') {
+				try {
+					const tag = url.searchParams.get('tag');
+					const month = url.searchParams.get('month');
+					const year = url.searchParams.get('year');
+					if (month && !year) {
+						return new Response('Year parameter is required when month is specified', { status: 400 });
+					}
+
+					let prefix = 'recipe:';
+					if (month && year) {
+						prefix += `${year}-${month}`;
+					}
+
+					console.log('Fetching recipes with prefix:', prefix);
+
+					const list = await env.RECIPES_KV.list({ prefix });
+					const recipes = [];
+
+					for (const key of list.keys) {
+						const value = await env.RECIPES_KV.get<Recipe>(key.name, 'json');
+						if (value) {
+							let matches = true;
+
+							if (tag && (!value.tags || !value.tags.includes(tag))) {
+								matches = false;
+							}
+
+							if (year && !value.date.startsWith(year)) {
+								throw new Error('Date / prefix mismatch');
+							}
+
+							if (matches) {
+								recipes.push(value);
+							}
+						}
+					}
+
+					return new Response(JSON.stringify(recipes), {
+						headers: { 'Content-Type': 'application/json' },
+					});
+				} catch (e) {
+					console.error('Error fetching recipes:', e);
+					return new Response('Error fetching recipes', { status: 500 });
+				}
+			}
+
+			if (request.method === 'POST') {
+				try {
+					const email = getAuthFromRequest(request);
+					if (!email && !import.meta.env.DEV) {
+						return new Response('Unauthorized', { status: 401 });
+					}
+
+					const body = await request.json<Omit<Recipe, 'id'>>();
+					const id = crypto.randomUUID();
+
+					const newRecipe = { ...body, id };
+
+					const key = newRecipe.date ? `recipe:${newRecipe.date}:${id}` : `recipe:${id}`;
+
+					await env.RECIPES_KV.put(key, JSON.stringify(newRecipe));
+
+					return new Response(JSON.stringify(newRecipe), {
+						headers: { 'Content-Type': 'application/json' },
+						status: 201,
+					});
+				} catch (e) {
+					console.error('Error adding recipe:', e);
+					return new Response('Error adding recipe', { status: 500 });
+				}
+			}
+		}
+
+		if (url.pathname === apiRoutes.recipeUpload && request.method === 'PUT') {
+			try {
+				const key = crypto.randomUUID();
+				const contentType = request.headers.get('Content-Type');
+
+				await env.RECIPES_BUCKET.put(key, request.body, {
+					httpMetadata: {
+						contentType: contentType?.toString(),
+					},
+				});
+				return new Response(JSON.stringify({ key }), {
+					headers: { 'Content-Type': 'application/json' },
+				});
+			} catch (e) {
+				console.error('Error uploading file:', e);
+				return new Response('Error uploading file', { status: 500 });
+			}
+		}
+
+		if (url.pathname.startsWith(apiRoutes.recipeImage)) {
+			const key = url.pathname.split('/').pop();
+			if (!key) {
+				return new Response('Image not found', { status: 400 });
+			}
+
+			const cacheUrl = new URL(request.url);
+			const cacheKey = new Request(cacheUrl.toString(), request);
+			const cache = caches.default;
+
+			let response = await cache.match(cacheKey);
+			if (response) {
+				return response;
+			}
+
+			try {
+				const object = await env.RECIPES_BUCKET.get(key);
+				if (!object) {
+					return new Response('Image not found', { status: 404 });
+				}
+
+				const headers = new Headers();
+				object.writeHttpMetadata(headers);
+
+				headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+
+				response = new Response(object.body, {
+					headers,
+				});
+
+				ctx.waitUntil(cache.put(cacheKey, response.clone()));
+
+				return response;
+			} catch (e) {
+				console.error('Error fetching image:', e);
+				return new Response('Error fetching image', { status: 500 });
 			}
 		}
 
