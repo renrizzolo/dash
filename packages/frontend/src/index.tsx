@@ -1,4 +1,6 @@
 /* @refresh reload */
+import 'virtual:uno.css';
+import '@unocss/reset/eric-meyer.css';
 import { render } from 'solid-js/web';
 import { Router, Route } from '@solidjs/router';
 import { QueryClient, QueryClientProvider } from '@tanstack/solid-query';

@@ -4,7 +4,9 @@
 	"private": true,
 	"scripts": {
 		"dev": "pnpm --filter frontend dev",
+		"dev:ui": "pnpm --filter ui dev",
 		"lint": "oxlint --type-aware",
+		"type-check": "pnpm -r type-check",
 		"deploy": "pnpm --filter frontend run deploy"
 	},
 	"lint-staged": {
