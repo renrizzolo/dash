@@ -31,7 +31,7 @@ export const presetDash = () => [
 						default: '#DDDDDD',
 					},
 					accent: {
-						DEFAULT: '#ff5722',
+						default: '#ff5722',
 					},
 				},
 				fontFamily: {
@@ -143,12 +143,12 @@ export const presetDash = () => [
 				['min-h-screen', { 'min-height': '100vh' }],
 
 				[/^w-(.*)/, ([, d], { theme }) => ({ width: theme.size?.[d as keyof typeof theme.size] || d })],
-				[/^min-w-(\d+)$/, ([, d], { theme }) => ({ 'min-width': theme.size?.[d as keyof typeof theme.size] })],
-				[/^max-w-(\d+)$/, ([, d], { theme }) => ({ 'max-width': theme.size?.[d as keyof typeof theme.size] })],
+				[/^min-w-(.*)$/, ([, d], { theme }) => ({ 'min-width': theme.size?.[d as keyof typeof theme.size] })],
+				[/^max-w-(.*)$/, ([, d], { theme }) => ({ 'max-width': theme.size?.[d as keyof typeof theme.size] || d })],
 
-				[/^h-(\d+)$/, ([, d], { theme }) => ({ height: theme.size?.[d as keyof typeof theme.size] })],
-				[/^min-h-(\d+)$/, ([, d], { theme }) => ({ 'min-height': theme.size?.[d as keyof typeof theme.size] })],
-				[/^max-h-(\d+)$/, ([, d], { theme }) => ({ 'max-height': theme.size?.[d as keyof typeof theme.size] })],
+				[/^h-(.*)$/, ([, d], { theme }) => ({ height: theme.size?.[d as keyof typeof theme.size] })],
+				[/^min-h-(.*)$/, ([, d], { theme }) => ({ 'min-height': theme.size?.[d as keyof typeof theme.size] })],
+				[/^max-h-(.*)$/, ([, d], { theme }) => ({ 'max-height': theme.size?.[d as keyof typeof theme.size] })],
 
 				// Positioning
 				['absolute', { position: 'absolute' }],
@@ -330,7 +330,6 @@ export const presetDash = () => [
 				['text-left', { 'text-align': 'left' }],
 				['text-center', { 'text-align': 'center' }],
 				['text-right', { 'text-align': 'right' }],
-				['text-justify', { 'text-align': 'justify' }],
 
 				['uppercase', { 'text-transform': 'uppercase' }],
 				['lowercase', { 'text-transform': 'lowercase' }],
@@ -363,7 +362,7 @@ export const presetDash = () => [
 						if (theme.colors.text[c as keyof typeof theme.colors.text])
 							return { color: theme.colors.text[c as keyof typeof theme.colors.text] };
 					},
-					{ autocomplete: 'text-$colors' },
+					{ autocomplete: 'text-$colors.text' },
 				],
 				[
 					/^bg-(.+)$/,
@@ -371,7 +370,7 @@ export const presetDash = () => [
 						if (theme.colors.background?.[c as keyof typeof theme.colors.background])
 							return { 'background-color': theme.colors.background[c as keyof typeof theme.colors.background] };
 					},
-					{ autocomplete: 'bg-$colors' },
+					{ autocomplete: 'bg-$colors.background' },
 				],
 
 				// Borders & Rounded
@@ -420,7 +419,7 @@ export const presetDash = () => [
 
 			shortcuts: [
 				[
-					/^stack-(center|start|end|justify)-(\d+)$/,
+					/^stack-(center|start|end|stretch)-(\d+)$/,
 					([, alignment, size]) => `flex-col items-${alignment} gap-${size}`,
 					{ autocomplete: ['stack-center-$spacing', 'stack-start-$spacing', 'stack-end-$spacing', 'stack-justify-$spacing'] },
 				],
