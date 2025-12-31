@@ -5,6 +5,7 @@ export const apiRoutes = {
 	recipes: '/api/recipes',
 	recipeUpload: '/api/recipes/upload',
 	recipeImage: '/api/recipes/images',
+	auth: '/api/auth/user',
 } as const;
 
 type APIEndpoint = (typeof apiRoutes)[keyof typeof apiRoutes];
@@ -17,6 +18,8 @@ type ApiReturnType<T extends APIEndpoint> = T extends '/api/trains'
 	? { key: string }
 	: T extends `/api/recipes/images`
 	? { key: string }
+	: T extends '/api/auth/user'
+	? { email: string }
 	: never;
 
 async function apiFetch<T extends APIEndpoint>(
@@ -34,15 +37,17 @@ async function apiFetch<T extends APIEndpoint>(
 			}
 		});
 	}
+
 	const response = await fetch(endpoint + (params ? `?${params.toString()}` : ''), options);
 	if (!response.ok) {
 		throw new Error(`API request failed with status ${response.status}`);
 	}
+
 	try {
 		const data = await response.json();
 		return data as ApiReturnType<T>;
 	} catch {
-		throw new Error('Failed to parse train data.');
+		throw new Error('Failed to parse data.');
 	}
 }
 
@@ -83,4 +88,17 @@ export async function uploadImage(file: File | Blob) {
 	);
 
 	return response.key;
+}
+
+export async function checkAuth() {
+	try {
+		await apiFetch('/api/auth/user');
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+export async function fetchAuthUser() {
+	return apiFetch('/api/auth/user');
 }

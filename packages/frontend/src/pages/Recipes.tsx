@@ -1,11 +1,19 @@
+import { onMount } from 'solid-js';
 import { useSearchParams } from '@solidjs/router';
 import { keepPreviousData, useQuery } from '@tanstack/solid-query';
-import { fetchRecipes } from '../api';
+import { fetchRecipes, checkAuth } from '../api';
 import { Calendar } from '../components/Calendar';
 import { Page } from '../components/Page';
 import type { RecipeParams } from '../types';
 
 export function Recipes() {
+	onMount(async () => {
+		const isAuthed = await checkAuth();
+		if (!isAuthed) {
+			window.location.reload();
+		}
+	});
+
 	const [searchParams, setSearchParams] = useSearchParams<RecipeParams>();
 
 	const today = new Date();

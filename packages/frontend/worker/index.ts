@@ -98,6 +98,21 @@ export default {
 			}
 		}
 
+		if (url.pathname === apiRoutes.auth) {
+			const email = request.headers.get('Cf-Access-Authenticated-User-Email');
+			if (email) {
+				return new Response(JSON.stringify({ email }), {
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
+			if (import.meta.env.DEV) {
+				return new Response(JSON.stringify({ email: 'dev' }), { headers: { 'Content-Type': 'application/json' } });
+			}
+
+			return new Response('Unauthorized', { status: 401 });
+		}
+
 		if (url.pathname === apiRoutes.recipes) {
 			if (request.method === 'GET') {
 				try {
@@ -148,6 +163,11 @@ export default {
 
 			if (request.method === 'POST') {
 				try {
+					const email = request.headers.get('Cf-Access-Authenticated-User-Email');
+					if (!email && !import.meta.env.DEV) {
+						return new Response('Unauthorized', { status: 401 });
+					}
+
 					const body = await request.json<Omit<Recipe, 'id'>>();
 					const id = crypto.randomUUID();
 
