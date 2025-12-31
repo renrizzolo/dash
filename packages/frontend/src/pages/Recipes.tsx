@@ -1,11 +1,24 @@
+import { onMount, createSignal, Show } from 'solid-js';
 import { useSearchParams } from '@solidjs/router';
 import { keepPreviousData, useQuery } from '@tanstack/solid-query';
-import { fetchRecipes } from '../api';
+import { fetchRecipes, checkAuth } from '../api';
 import { Calendar } from '../components/Calendar';
 import { Page } from '../components/Page';
+import { Loading } from '../components/Loading';
 import type { RecipeParams } from '../types';
 
 export function Recipes() {
+	const [verified, setVerified] = createSignal(false);
+
+	onMount(async () => {
+		const isAuthed = await checkAuth();
+		if (!isAuthed) {
+			window.location.reload();
+		} else {
+			setVerified(true);
+		}
+	});
+
 	const [searchParams, setSearchParams] = useSearchParams<RecipeParams>();
 
 	const today = new Date();
@@ -17,6 +30,7 @@ export function Recipes() {
 		queryKey: ['recipes', { tag: searchParams.tag, month: month(), year: year() }],
 		queryFn: () => fetchRecipes({ tag: searchParams.tag, month: month(), year: year() }),
 		placeholderData: keepPreviousData,
+		enabled: verified(),
 	}));
 
 	const handleMonthChange = (date: Date) => {
@@ -27,21 +41,23 @@ export function Recipes() {
 	};
 
 	return (
-		<Page
-			headerStart={null}
-			content={
-				<Calendar
-					recipes={query.data}
-					onRecipeAdded={() => {
-						void query.refetch();
-					}}
-					currentDate={currentDate()}
-					onMonthChange={handleMonthChange}
-					isLoading={query.isLoading || query.isPending}
-					isFetching={query.isFetching}
-					isError={query.isError}
-				/>
-			}
-		/>
+		<Show when={verified()} fallback={<Loading />}>
+			<Page
+				headerStart={null}
+				content={
+					<Calendar
+						recipes={query.data}
+						onRecipeAdded={() => {
+							void query.refetch();
+						}}
+						currentDate={currentDate()}
+						onMonthChange={handleMonthChange}
+						isLoading={query.isLoading || query.isPending}
+						isFetching={query.isFetching}
+						isError={query.isError}
+					/>
+				}
+			/>
+		</Show>
 	);
 }

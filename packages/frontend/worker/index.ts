@@ -28,6 +28,30 @@ async function buildPtvUrl(path: string, developerId: string, apiKey: string): P
 	return `${baseUrl}${requestMessage}&signature=${signature}`;
 }
 
+function getAuthFromRequest(request: Request): string | null {
+	const cookieHeader = request.headers.get('Cookie');
+	if (!cookieHeader) return null;
+
+	const cookies = cookieHeader.split(';').map((c) => c.trim());
+	const authCookie = cookies.find((c) => c.startsWith('CF_Authorization='));
+	if (!authCookie) return null;
+
+	const jwt = authCookie.split('=')[1];
+	try {
+		// index 1 is the payload
+		const payload = JSON.parse(atob(jwt.split('.')[1]));
+
+		if (payload.exp < Date.now() / 1000) {
+			console.warn('JWT has expired');
+			return null;
+		}
+		return payload.email;
+	} catch (e) {
+		console.error('Failed to parse JWT', e);
+		return null;
+	}
+}
+
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
@@ -98,6 +122,21 @@ export default {
 			}
 		}
 
+		if (url.pathname === apiRoutes.auth) {
+			const email = getAuthFromRequest(request);
+			if (email) {
+				return new Response(JSON.stringify({ email }), {
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+
+			if (import.meta.env.DEV) {
+				return new Response(JSON.stringify({ email: 'dev' }), { headers: { 'Content-Type': 'application/json' } });
+			}
+
+			return new Response('Unauthorized', { status: 401 });
+		}
+
 		if (url.pathname === apiRoutes.recipes) {
 			if (request.method === 'GET') {
 				try {
@@ -148,6 +187,11 @@ export default {
 
 			if (request.method === 'POST') {
 				try {
+					const email = getAuthFromRequest(request);
+					if (!email && !import.meta.env.DEV) {
+						return new Response('Unauthorized', { status: 401 });
+					}
+
 					const body = await request.json<Omit<Recipe, 'id'>>();
 					const id = crypto.randomUUID();
 
