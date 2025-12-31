@@ -54,8 +54,8 @@ export function Train() {
 				)
 			}
 			footer={
-				<p>
-					<small>Source: Licensed from Public Transport Victoria under a Creative Commons Attribution 4.0 International Licence.</small>
+				<p class="text-sm text-center text-muted">
+					Source: Licensed from Public Transport Victoria under a Creative Commons Attribution 4.0 International Licence.
 				</p>
 			}
 		/>
