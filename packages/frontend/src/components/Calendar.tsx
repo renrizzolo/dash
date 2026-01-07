@@ -9,7 +9,7 @@ import { LoadingBlip } from './Loading';
 
 interface CalendarProps {
 	recipes: Recipe[] | undefined;
-	onRecipeAdded: () => void;
+	refetch: () => void;
 	currentDate: Date;
 	onMonthChange: (date: Date) => void;
 	isLoading: boolean;
@@ -26,7 +26,7 @@ function toLocalDateString(date: Date) {
 
 export function Calendar(props: CalendarProps) {
 	const [selectedDate, setSelectedDate] = createSignal<Date | null>(props.currentDate);
-	const [isAdding, setIsAdding] = createSignal(false);
+	const [showForm, setShowForm] = createSignal(false);
 	const [newRecipeName, setNewRecipeName] = createSignal('');
 	const [newRecipeDesc, setNewRecipeDesc] = createSignal('');
 	const [newRecipeUrl, setNewRecipeUrl] = createSignal<string | null>(null);
@@ -43,7 +43,6 @@ export function Calendar(props: CalendarProps) {
 		} else {
 			setSelectedDate(viewDate);
 		}
-		// setIsAdding(false);
 	});
 
 	const todayDateString = () => toLocalDateString(new Date());
@@ -85,7 +84,6 @@ export function Calendar(props: CalendarProps) {
 	const handleDateClick = (date: Date | null) => {
 		if (date) {
 			setSelectedDate(date);
-			// setIsAdding(false);
 		}
 	};
 
@@ -112,9 +110,9 @@ export function Calendar(props: CalendarProps) {
 		};
 
 		await addRecipe(recipe);
-		props.onRecipeAdded();
+		props.refetch();
 
-		setIsAdding(false);
+		setShowForm(false);
 		setNewRecipeName('');
 		setNewRecipeDesc('');
 		setNewRecipeUrl(null);
@@ -138,7 +136,7 @@ export function Calendar(props: CalendarProps) {
 							type="button"
 							class="button"
 							onClick={() => {
-								void props.onRecipeAdded();
+								props.refetch();
 							}}
 						>
 							Retry
@@ -214,11 +212,11 @@ export function Calendar(props: CalendarProps) {
 					<button
 						type="button"
 						class="button button-icon button-add-recipe"
-						aria-pressed={isAdding()}
-						onClick={() => setIsAdding(!isAdding())}
+						aria-pressed={showForm()}
+						onClick={() => setShowForm(!showForm())}
 					>
 						<Show
-							when={!isAdding()}
+							when={!showForm()}
 							fallback={
 								<svg
 									data-slot="icon"
@@ -253,7 +251,7 @@ export function Calendar(props: CalendarProps) {
 				</div>
 			</div>
 
-			<Show when={isAdding()}>
+			<Show when={showForm()}>
 				<form
 					onSubmit={(e) => {
 						void handleAdd(e);
