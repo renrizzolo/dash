@@ -10,13 +10,17 @@ import { createSignal, onMount, Show } from 'solid-js';
 export function Recipes() {
 	const [verified, setVerified] = createSignal(false);
 
-	onMount(async () => {
-		const isAuthed = await checkAuth();
-		if (!isAuthed) {
-			window.location.reload();
-		} else {
-			setVerified(true);
+	onMount(() => {
+		async function verify() {
+			const isAuthed = await checkAuth();
+			if (!isAuthed) {
+				window.location.reload();
+			} else {
+				setVerified(true);
+			}
 		}
+
+		void verify();
 	});
 
 	const [searchParams, setSearchParams] = useSearchParams<RecipeParams>();
