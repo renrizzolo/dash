@@ -147,7 +147,7 @@ export default {
 					},
 				});
 
-				// ctx.waitUntil(cache.put(cacheKey, response.clone()));
+				ctx.waitUntil(cache.put(cacheKey, response.clone()));
 
 				return response;
 			} catch (error) {
