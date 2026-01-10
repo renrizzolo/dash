@@ -344,6 +344,13 @@ export const presetDash = () => [
 				['text-strike', { 'text-decoration': 'line-through' }],
 
 				[
+					'text-box-trim',
+					{
+						'text-box-trim': 'trim-both',
+					},
+				],
+
+				[
 					/^text-(xs|sm|base|lg|xl|2xl|3xl|4xl)$/,
 					([, size]) => {
 						const sizes = {

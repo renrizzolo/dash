@@ -97,8 +97,13 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 										<div class="stack-stretch-2 mt-2">
 											<For each={departure.disruptions}>
 												{(disruption) => (
-													<div class="text-xs leading-5 ps-2" style={{ 'border-left': `3px solid ${disruption.colour}` }}>
-														<a href={disruption.url} class="no-underline hover:underline text-inverse" target="_blank" rel="noreferrer">
+													<div class="text-xs flex-col leading-5 ps-2" style={{ 'border-left': `3px solid ${disruption.colour}` }}>
+														<a
+															href={disruption.url}
+															class="text-box-trim no-underline hover:underline text-inverse"
+															target="_blank"
+															rel="noreferrer"
+														>
 															{disruption.title}
 														</a>
 													</div>
