@@ -1,22 +1,26 @@
-import { onMount, createSignal, Show } from 'solid-js';
 import { useSearchParams } from '@solidjs/router';
 import { keepPreviousData, useQuery } from '@tanstack/solid-query';
 import { fetchRecipes, checkAuth } from '../api';
 import { Calendar } from '../components/Calendar';
 import { Page } from '../components/Page';
-import { Loading } from '../components/Loading';
+import { Loading } from 'ui/components';
 import type { RecipeParams } from '../types';
+import { createSignal, onMount, Show } from 'solid-js';
 
 export function Recipes() {
 	const [verified, setVerified] = createSignal(false);
 
-	onMount(async () => {
-		const isAuthed = await checkAuth();
-		if (!isAuthed) {
-			window.location.reload();
-		} else {
-			setVerified(true);
+	onMount(() => {
+		async function verify() {
+			const isAuthed = await checkAuth();
+			if (!isAuthed) {
+				window.location.reload();
+			} else {
+				setVerified(true);
+			}
 		}
+
+		void verify();
 	});
 
 	const [searchParams, setSearchParams] = useSearchParams<RecipeParams>();
@@ -47,7 +51,7 @@ export function Recipes() {
 				content={
 					<Calendar
 						recipes={query.data}
-						onRecipeAdded={() => {
+						refetch={() => {
 							void query.refetch();
 						}}
 						currentDate={currentDate()}

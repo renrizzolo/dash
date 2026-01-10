@@ -4,7 +4,9 @@
 	"private": true,
 	"scripts": {
 		"dev": "pnpm --filter frontend dev",
+		"dev:ui": "pnpm --filter ui dev",
 		"lint": "oxlint --type-aware",
+		"type-check": "pnpm -r type-check",
 		"deploy": "pnpm --filter frontend run deploy"
 	},
 	"lint-staged": {
@@ -12,8 +14,8 @@
 	},
 	"devDependencies": {
 		"lint-staged": "^16.2.7",
-		"oxlint": "^1.30.0",
-		"oxlint-tsgolint": "^0.8.3",
+		"oxlint": "^1.38.0",
+		"oxlint-tsgolint": "^0.8.6",
 		"typescript": "^5.9.3"
 	}
 }

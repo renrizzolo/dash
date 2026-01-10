@@ -1,5 +1,7 @@
 import type { Component } from 'solid-js';
-import { For, Match, Switch } from 'solid-js';
+import { Card, Badge, Loading } from 'ui/components';
+import { clsx } from 'clsx';
+import { For, Match, Switch, Show } from 'solid-js';
 import type { Departure } from '../types';
 
 interface TrainDeparturesProps {
@@ -35,21 +37,21 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 	};
 
 	return (
-		<div class={'train-departures-grid ' + (props.loading ? 'loading' : '')}>
-			<Switch fallback={<p>Loading departures...</p>}>
+		<div class={'stack-stretch-4 ' + (props.loading ? 'opacity-50' : '')}>
+			<Switch fallback={<Loading />}>
 				<Match when={props.departures === undefined}>
 					{Array.from({ length: 10 }).map(() => (
-						<div class="departure-item">
-							<div class="departure-info">
-								<span class="departure-time-meta">&nbsp;</span>
+						<Card mode="dark" variant="default">
+							<div class="flex-row justify-between items-end">
+								<span class="text-xs font-medium">&nbsp;</span>
 								<span>&nbsp;</span>
 							</div>
-							<div class="departure-info">
-								<span class="departure-time">
+							<div class="flex-row justify-between items-end">
+								<span class="text-xl font-bold">
 									<time>&nbsp;</time>
 								</span>
 							</div>
-						</div>
+						</Card>
 					))}
 				</Match>
 				<Match when={props.departures && props.departures.length === 0}>
@@ -61,38 +63,55 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 							const relative = () => relativeTime(departure.estimated_departure_utc || departure.scheduled_departure_utc, index() === 0);
 							const isDelayedOrEarly =
 								departure.estimated_departure_utc && departure.scheduled_departure_utc !== departure.estimated_departure_utc;
+							const hasDisruptions = () => departure.disruptions && departure.disruptions.length > 0;
 
 							return (
-								<div
-									class={'departure-item' + (index() === 0 ? ' departure-item-next' : '') + (relative() === 'departed' ? ' departed' : '')}
-								>
-									<div class="departure-info">
-										<span class={'departure-time-meta' + (isDelayedOrEarly ? ' strike' : '')}>
+								<Card variant={index() === 0 ? 'highlight' : 'default'} mode="dark" class={relative() === 'departed' ? 'opacity-50' : ''}>
+									<div class="flex-row justify-between items-end w-full">
+										<span class={clsx('text-xs font-medium', isDelayedOrEarly && 'text-strike')}>
 											{isDelayedOrEarly ? <time>{formatUTCDateToLocal(departure.scheduled_departure_utc)}</time> : 'On time'}
 										</span>
-										<span>
-											<span class="departure-item-label">Platform</span> {departure.platform || '-'}
+										<span class="text-xs">
+											<span class="text-inverse-muted font-light">Platform</span> {departure.platform || '-'}
 										</span>
 									</div>
-									<div class="departure-info">
-										<span class="departure-time">
+									<div class="flex-row justify-between items-end w-full">
+										<span class="text-xl font-bold">
 											<time>
 												{formatUTCDateToLocal(isDelayedOrEarly ? departure.estimated_departure_utc! : departure.scheduled_departure_utc)}{' '}
 											</time>
-											<span class="relative-time">
+											<span class="text-lg text-inverse-muted">
 												<Switch fallback={relative()}>
 													<Match when={relative() === 'departed'}>
-														<span class="departed">Departed</span>
+														<span>Departed</span>
 													</Match>
 													<Match when={relative() === 'departing'}>
-														<span class="departing">Departing</span>
+														<span>Departing</span>
 													</Match>
 												</Switch>
 											</span>
 										</span>
-										<div class="badge">{departure.destination}</div>
+										<Badge>{departure.destination}</Badge>
 									</div>
-								</div>
+									<Show when={hasDisruptions()}>
+										<div class="stack-stretch-2 mt-2">
+											<For each={departure.disruptions}>
+												{(disruption) => (
+													<div class="text-xs flex-col leading-5 ps-2" style={{ 'border-left': `3px solid ${disruption.colour}` }}>
+														<a
+															href={disruption.url}
+															class="text-box-trim no-underline hover:underline text-inverse"
+															target="_blank"
+															rel="noreferrer"
+														>
+															{disruption.title}
+														</a>
+													</div>
+												)}
+											</For>
+										</div>
+									</Show>
+								</Card>
 							);
 						}}
 					</For>

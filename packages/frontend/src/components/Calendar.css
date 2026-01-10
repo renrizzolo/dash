@@ -128,12 +128,6 @@ h6 {
 	cursor: default;
 }
 
-.calendar-loading-blip {
-	position: absolute;
-	inset-inline-end: 8px;
-	inset-block-end: 8px;
-}
-
 .dot {
 	width: 6px;
 	height: 6px;
