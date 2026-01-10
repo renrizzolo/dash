@@ -8,7 +8,7 @@ export default defineConfig({
 	plugins: [
 		solid(),
 		cloudflare(),
-		UnoCSS(),
+		UnoCSS({ configDeps: ['../ui/src/styles/preset.ts'] }),
 		legacy({
 			targets: ['defaults', 'not IE 11'],
 		}),
