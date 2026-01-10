@@ -12,12 +12,12 @@ export function Train() {
 	const [dateTimeNow, setDateTimeNow] = createSignal(new Date());
 
 	onMount(() => {
-		const countdownInterval = setInterval(async () => {
+		const countdownInterval = setInterval(() => {
 			setCountdown((prev) => (prev < REFRESH_INTERVAL_SECONDS ? prev + 1 : 0));
 			setDateTimeNow(new Date());
 
 			if (countdown() === REFRESH_INTERVAL_SECONDS) {
-				await refetch();
+				refetch();
 				setCountdown(0);
 			}
 		}, 1000);
