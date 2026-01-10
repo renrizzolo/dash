@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/solid-query';
 import { fetchRecipes, checkAuth } from '../api';
 import { Calendar } from '../components/Calendar';
 import { Page } from '../components/Page';
-import { Loading } from '../components/Loading';
+import { Loading } from 'ui/components';
 import type { RecipeParams } from '../types';
 import { createSignal, onMount, Show } from 'solid-js';
 

@@ -5,7 +5,7 @@ import { addRecipe, uploadImage } from '../api';
 import { compressImage } from '../utils';
 import './Calendar.css';
 import type { Recipe } from '../types';
-import { LoadingBlip } from './Loading';
+import { LoadingBlip } from 'ui/components';
 
 interface CalendarProps {
 	recipes: Recipe[] | undefined;
@@ -246,7 +246,7 @@ export function Calendar(props: CalendarProps) {
 					</button>
 				</div>
 
-				<div class="calendar-loading-blip">
+				<div class="absolute bottom-2 right-2">
 					<LoadingBlip active={props.isFetching} />
 				</div>
 			</div>

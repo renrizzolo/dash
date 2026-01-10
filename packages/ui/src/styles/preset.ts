@@ -9,13 +9,15 @@ export const presetDash = () => [
 				colors: {
 					text: {
 						default: '#000000',
-						muted: '#525252',
+						muted: '#404040',
 						inverse: '#FFFFFF',
+						'inverse-muted': '#A3A3A3',
 					},
 					background: {
 						default: '#FFFFFF',
 						muted: '#d4d4d4',
 						inverse: '#000000',
+						'inverse-muted': '#262626',
 						50: '#fafafa',
 						100: '#f5f5f5',
 						200: '#e5e5e5',
@@ -29,6 +31,8 @@ export const presetDash = () => [
 					},
 					border: {
 						default: '#DDDDDD',
+						highlight: '#404040',
+						inverse: '#333333',
 					},
 					accent: {
 						default: '#ff5722',
@@ -415,6 +419,38 @@ export const presetDash = () => [
 				['aspect-video', { 'aspect-ratio': '16 / 9' }],
 
 				[/^opacity-(\d+)$/, ([, d]) => ({ opacity: Number(d) / 100 })],
+
+				// Animations
+				['animate-spin', { animation: 'spin 1.5s linear infinite' }],
+				['animate-blip', { animation: 'blip 1.5s ease infinite' }],
+
+				// Outline
+				['outline-none', { outline: 'none' }],
+				[
+					/^outline-highlight$/,
+					(_, { theme }) => ({
+						'outline-style': 'dashed',
+						'outline-offset': '3px',
+						'outline-width': '2px',
+						'outline-color': theme.colors.border.highlight,
+					}),
+				],
+			],
+
+			preflights: [
+				{
+					getCSS: () => `
+										@keyframes blip {
+											0%, 100% { opacity: 0; transform: scale(1); }
+											50% { opacity: 1; transform: scale(0.8); }
+										}
+										@keyframes spin {
+											0% { transform: rotate(90deg) scaleY(1); }
+											50% { transform: rotate(90deg) scaleY(-1); }
+											100% { transform: rotate(90deg) scaleY(1); }
+										}
+									`,
+				},
 			],
 
 			shortcuts: [
