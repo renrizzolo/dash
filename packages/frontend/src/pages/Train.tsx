@@ -54,7 +54,7 @@ export function Train() {
 				)
 			}
 			footer={
-				<p class="text-sm text-center text-muted">
+				<p class="mt-4 text-sm text-center text-muted">
 					Source: Licensed from Public Transport Victoria under a Creative Commons Attribution 4.0 International Licence.
 				</p>
 			}

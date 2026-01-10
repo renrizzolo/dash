@@ -1,7 +1,7 @@
 import type { Component } from 'solid-js';
-import { For, Match, Switch } from 'solid-js';
 import { Card, Badge, Loading } from 'ui/components';
 import { clsx } from 'clsx';
+import { For, Match, Switch, Show } from 'solid-js';
 import type { Departure } from '../types';
 
 interface TrainDeparturesProps {
@@ -63,6 +63,7 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 							const relative = () => relativeTime(departure.estimated_departure_utc || departure.scheduled_departure_utc, index() === 0);
 							const isDelayedOrEarly =
 								departure.estimated_departure_utc && departure.scheduled_departure_utc !== departure.estimated_departure_utc;
+							const hasDisruptions = () => departure.disruptions && departure.disruptions.length > 0;
 
 							return (
 								<Card variant={index() === 0 ? 'highlight' : 'default'} mode="dark" class={relative() === 'departed' ? 'opacity-50' : ''}>
@@ -92,6 +93,19 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 										</span>
 										<Badge>{departure.destination}</Badge>
 									</div>
+									<Show when={hasDisruptions()}>
+										<div class="stack-stretch-2 mt-2">
+											<For each={departure.disruptions}>
+												{(disruption) => (
+													<div class="text-xs leading-5 ps-2" style={{ 'border-left': `3px solid ${disruption.colour}` }}>
+														<a href={disruption.url} class="no-underline hover:underline text-inverse" target="_blank" rel="noreferrer">
+															{disruption.title}
+														</a>
+													</div>
+												)}
+											</For>
+										</div>
+									</Show>
 								</Card>
 							);
 						}}
