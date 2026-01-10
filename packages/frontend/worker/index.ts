@@ -141,8 +141,9 @@ export default {
 			if (request.method === 'GET') {
 				try {
 					const tag = url.searchParams.get('tag');
-					const month = url.searchParams.get('month');
+					const month = url.searchParams.get('month')?.padStart(2, '0');
 					const year = url.searchParams.get('year');
+
 					if (month && !year) {
 						return new Response('Year parameter is required when month is specified', { status: 400 });
 					}
@@ -188,6 +189,7 @@ export default {
 			if (request.method === 'POST') {
 				try {
 					const email = getAuthFromRequest(request);
+
 					if (!email && !import.meta.env.DEV) {
 						return new Response('Unauthorized', { status: 401 });
 					}
