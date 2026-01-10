@@ -20,6 +20,16 @@ export interface Departure {
 	destination: string;
 	scheduled_departure_utc: string;
 	estimated_departure_utc: string | null;
+	disruptions: Disruption[];
+}
+
+export interface Disruption {
+	disruption_id: number;
+	title: string;
+	description: string;
+	url: string;
+	colour: string;
+	display_status: string;
 }
 
 interface PTVDeparture {
@@ -68,7 +78,37 @@ interface PTVStop {
 	stop_suburb: string;
 }
 
-interface PTVDisruption {}
+interface PTVDisruptionRoute {
+	route_type: number;
+	route_id: number;
+	direction: {
+		direction_id: number;
+		direction_name: string;
+		route_type: number;
+	} | null;
+}
+
+interface PTVDisruptionStop {
+	stop_id: number;
+	stop_name: string;
+}
+
+interface PTVDisruption {
+	disruption_id: number;
+	title: string;
+	url: string;
+	description: string;
+	disruption_status: string;
+	disruption_type: string;
+	published_datetime: string;
+	last_updated_datetime: string;
+	from_date: string;
+	to_date: string;
+	routes: PTVDisruptionRoute[];
+	stops: PTVDisruptionStop[];
+	colour: string;
+	display_status: string;
+}
 
 export interface PTVDeparturesResponse {
 	departures: PTVDeparture[];
@@ -76,7 +116,7 @@ export interface PTVDeparturesResponse {
 	runs: Record<string, PTVRun>;
 	routes: Record<string, PTVRoute>;
 	stops: Record<string, PTVStop>;
-	disruptions: PTVDisruption[];
+	disruptions: Record<string, PTVDisruption>;
 	status: {
 		version: string;
 		health: {

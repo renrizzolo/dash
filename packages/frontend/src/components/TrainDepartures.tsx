@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js';
-import { For, Match, Switch } from 'solid-js';
+import { For, Match, Switch, Show } from 'solid-js';
 import type { Departure } from '../types';
 
 interface TrainDeparturesProps {
@@ -61,10 +61,16 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 							const relative = () => relativeTime(departure.estimated_departure_utc || departure.scheduled_departure_utc, index() === 0);
 							const isDelayedOrEarly =
 								departure.estimated_departure_utc && departure.scheduled_departure_utc !== departure.estimated_departure_utc;
+							const hasDisruptions = () => departure.disruptions && departure.disruptions.length > 0;
 
 							return (
 								<div
-									class={'departure-item' + (index() === 0 ? ' departure-item-next' : '') + (relative() === 'departed' ? ' departed' : '')}
+									class={
+										'departure-item' +
+										(index() === 0 ? ' departure-item-next' : '') +
+										(relative() === 'departed' ? ' departed' : '') +
+										(hasDisruptions() ? ' has-disruptions' : '')
+									}
 								>
 									<div class="departure-info">
 										<span class={'departure-time-meta' + (isDelayedOrEarly ? ' strike' : '')}>
@@ -92,6 +98,19 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 										</span>
 										<div class="badge">{departure.destination}</div>
 									</div>
+									<Show when={hasDisruptions()}>
+										<div class="disruptions">
+											<For each={departure.disruptions}>
+												{(disruption) => (
+													<div class="disruption-item" style={{ 'border-left': `3px solid ${disruption.colour}` }}>
+														<a href={disruption.url} target="_blank" rel="noreferrer">
+															{disruption.title}
+														</a>
+													</div>
+												)}
+											</For>
+										</div>
+									</Show>
 								</div>
 							);
 						}}

@@ -242,3 +242,22 @@ h2 {
 .departure-item {
 	color: #ffffff;
 }
+
+.disruptions {
+	font-size: 0.8rem;
+	font-weight: 400;
+}
+
+.disruption-item {
+	padding-left: 0.5rem;
+	margin-top: 0.5rem;
+}
+
+.disruption-item a {
+	text-decoration: none;
+	color: white;
+}
+
+.disruption-item a:hover {
+	text-decoration: underline;
+}

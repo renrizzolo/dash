@@ -73,7 +73,9 @@ export default {
 				// Balaclava Station stop ID: 1013
 				// Direction ID for Citybound: 1
 				// Route type 0 for trains
-				const ptvApiPath = `/v3/departures/route_type/0/stop/1013?look_backwards=false&direction_id=1&expand=3&max_results=10`;
+				// expand 3 - include platform info
+				// expand 5 - include disruptions
+				const ptvApiPath = `/v3/departures/route_type/0/stop/1013?stop_disruptions=true&look_backwards=false&direction_id=1&expand=5&expand=3&max_results=10`;
 
 				const ptvUrl = await buildPtvUrl(ptvApiPath, env.PTV_DEVELOPER_ID, env.PTV_API_KEY);
 
@@ -87,13 +89,44 @@ export default {
 
 				const data: PTVDeparturesResponse = await ptvResponse.json();
 
-				console.log('Fetched PTV data');
+				console.log('Fetched PTV data', data);
+
+				const allDisruptions = Object.values(data.disruptions || {});
+
 				// Extract relevant information
 				const departures = data.departures.map((departure) => {
 					const direction = data.directions[departure.direction_id];
 					const run = data.runs[departure.run_id];
 					const route = data.routes[departure.route_id];
 					const stop = data.stops[departure.stop_id];
+
+					const relevantDisruptions = allDisruptions
+						.filter((disruption) => {
+							// Check stops
+							if (disruption.stops && disruption.stops.some((dStop) => dStop.stop_id === departure.stop_id)) {
+								return true;
+							}
+							// Check routes
+							if (
+								disruption.routes &&
+								disruption.routes.some((dRoute) => {
+									if (dRoute.route_id !== departure.route_id) return false;
+									if (dRoute.direction && dRoute.direction.direction_id !== departure.direction_id) return false;
+									return true;
+								})
+							) {
+								return true;
+							}
+							return false;
+						})
+						.map((d) => ({
+							disruption_id: d.disruption_id,
+							title: d.title,
+							description: d.description,
+							url: d.url,
+							colour: d.colour,
+							display_status: d.display_status,
+						}));
 
 					return {
 						platform: departure.platform_number,
@@ -103,6 +136,7 @@ export default {
 						estimated_departure_utc: departure.estimated_departure_utc,
 						route_name: route ? route.route_name : 'N/A',
 						stop_name: stop ? stop.stop_name : 'N/A',
+						disruptions: relevantDisruptions,
 					};
 				});
 
@@ -113,7 +147,7 @@ export default {
 					},
 				});
 
-				ctx.waitUntil(cache.put(cacheKey, response.clone()));
+				// ctx.waitUntil(cache.put(cacheKey, response.clone()));
 
 				return response;
 			} catch (error) {
