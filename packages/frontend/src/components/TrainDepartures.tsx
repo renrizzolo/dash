@@ -41,7 +41,7 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 			<Switch fallback={<Loading />}>
 				<Match when={props.departures === undefined}>
 					{Array.from({ length: 10 }).map(() => (
-						<Card mode="dark" variant="default">
+						<Card variant="inverse">
 							<div class="flex-row justify-between items-end">
 								<span class="text-xs font-medium">&nbsp;</span>
 								<span>&nbsp;</span>
@@ -66,7 +66,7 @@ const TrainDepartures: Component<TrainDeparturesProps> = (props) => {
 							const hasDisruptions = () => departure.disruptions && departure.disruptions.length > 0;
 
 							return (
-								<Card variant={index() === 0 ? 'highlight' : 'default'} mode="dark" class={relative() === 'departed' ? 'opacity-50' : ''}>
+								<Card highlight={index() === 0} variant="inverse" class={relative() === 'departed' ? 'opacity-50' : ''}>
 									<div class="flex-row justify-between items-end w-full">
 										<span class={clsx('text-xs font-medium', isDelayedOrEarly && 'text-strike')}>
 											{isDelayedOrEarly ? <time>{formatUTCDateToLocal(departure.scheduled_departure_utc)}</time> : 'On time'}

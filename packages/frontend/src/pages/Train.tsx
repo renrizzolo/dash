@@ -2,7 +2,7 @@ import { createResource, createSignal, onMount, onCleanup } from 'solid-js';
 import { fetchTrainData } from '../api';
 import { Page } from '../components/Page';
 import TrainDepartures from '../components/TrainDepartures';
-import { Heading } from 'ui/components';
+import { Heading, Button } from 'ui/components';
 
 const REFRESH_INTERVAL_SECONDS = 60;
 
@@ -35,19 +35,18 @@ export function Train() {
 					<Heading level={2}>Balaclava station to City</Heading>
 				</>
 			}
-			headerEnd={<span class="countdown">Last updated: {countdown()}s ago</span>}
+			headerEnd={<span class="text-xs text-muted font-mono">Last updated: {countdown()}s ago</span>}
 			content={
 				departures.error ? (
-					<div class="error">
+					<div class="text-accent text-center stack-center-2">
 						Error: {departures.error?.message} <br />
-						<button
-							type="button"
+						<Button
 							onClick={() => {
 								void refetch();
 							}}
 						>
 							Retry
-						</button>
+						</Button>
 					</div>
 				) : (
 					<TrainDepartures departures={departures()} dateTimeNow={dateTimeNow()} loading={departures.loading} />
