@@ -1,0 +1,15 @@
+[data-toast-container] {
+	[data-toast] {
+		transform-origin: bottom center;
+		transform: translateY(calc(pow(var(--toast-offset), 0.9) * -1px)) scale(max(0, calc(1 - pow(var(--toast-index), 1) * 0.05)));
+		transition: cubic-bezier(0.86, 0, 0.07, 1) all 250ms;
+	}
+
+	&[data-expanded='true'],
+	&:focus-within {
+		& > [data-toast] {
+			transform: translateY(calc(var(--toast-offset-expanded) * -1px));
+			transition-delay: calc(var(--toast-index) * 25ms);
+		}
+	}
+}

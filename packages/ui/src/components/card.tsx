@@ -1,10 +1,10 @@
 import { clsx, type ClassValue } from 'clsx';
-import type { JSX } from 'solid-js';
+import { JSX, splitProps } from 'solid-js';
 import { createVariant } from '../styles/createVariant';
 
 type CardVariants = {
-	variant: 'default' | 'highlight';
-	mode: 'light' | 'dark';
+	variant?: 'default' | 'inverse' | 'error';
+	highlight?: boolean;
 };
 export type CardProps = {
 	children: JSX.Element;
@@ -12,18 +12,28 @@ export type CardProps = {
 } & CardVariants;
 
 const variantStyles = createVariant<CardVariants>({
-	mode: {
-		dark: 'bg-800 text-inverse',
-		light: 'bg-white text-default',
-	},
 	variant: {
-		default: '',
-		// TODO compound variant styles; these are dark only
-		highlight: 'bg-inverse outline-highlight',
+		default: 'bg-white text-current shadow-lg',
+		error: 'bg-error text-inverse',
+		inverse: 'bg-800 text-inverse',
 	},
+	highlight: { true: 'outline-highlight', false: '' },
 });
 
-export function Card(props: CardProps) {
-	console.log(variantStyles(props));
-	return <div class={clsx('rounded-lg p-4 text-left flex-col font-medium', variantStyles(props), props.class)}>{props.children}</div>;
+export function Card(props: CardProps & JSX.HTMLAttributes<HTMLDivElement>) {
+	const [local, rest] = splitProps(props, ['style', 'class', 'children', 'variant']);
+
+	return (
+		<div
+			class={clsx('font-sans rounded-xl p-5 text-left flex-col border-default font-medium', local.class, variantStyles(props))}
+			style={{
+				// TODO these vars don't exist yet
+				// '--text-current': local.variant === 'inverse' ? 'var(--text-inverse)' : 'var(--text-default)',
+				...(local.style as Record<string, string>),
+			}}
+			{...rest}
+		>
+			{local.children}
+		</div>
+	);
 }

@@ -12,8 +12,12 @@ export const presetDash = () => [
 						muted: '#404040',
 						inverse: '#FFFFFF',
 						'inverse-muted': '#A3A3A3',
+						accent: '#ff5722',
+						error: '#bb1111',
 					},
 					background: {
+						accent: '#ff5722',
+						error: '#bb1111',
 						default: '#FFFFFF',
 						muted: '#d4d4d4',
 						inverse: '#000000',
@@ -108,6 +112,7 @@ export const presetDash = () => [
 				['inline-block', { display: 'inline-block' }],
 				['inline', { display: 'inline' }],
 				['hidden', { display: 'none' }],
+				['invisible', { visibility: 'hidden' }],
 
 				['flex-col', { display: 'flex', 'flex-direction': 'column' }],
 				['flex-row', { display: 'flex', 'flex-direction': 'row' }],
@@ -125,6 +130,12 @@ export const presetDash = () => [
 				['justify-between', { 'justify-content': 'space-between' }],
 				['justify-around', { 'justify-content': 'space-around' }],
 				['justify-evenly', { 'justify-content': 'space-evenly' }],
+				['self-start', { 'align-self': 'flex-start' }],
+				['self-center', { 'align-self': 'center' }],
+				['self-end', { 'align-self': 'flex-end' }],
+				['justify-self-start', { 'justify-self': 'start' }],
+				['justify-self-center', { 'justify-self': 'center' }],
+				['justify-self-end', { 'justify-self': 'end' }],
 
 				['flex-grow', { 'flex-grow': '1' }],
 				['flex-shrink', { 'flex-shrink': '1' }],
@@ -142,17 +153,50 @@ export const presetDash = () => [
 				],
 				['grid-cols-auto', { 'grid-template-columns': `repeat(auto-fit, minmax(0, 1fr))` }],
 				[/^grid-cols-auto-(.+)$/, ([, size]) => ({ 'grid-template-columns': `repeat(auto-fit, minmax(${size}, 1fr))` })],
+				[/^col-span-(\d+)$/, ([, d]) => ({ 'grid-column': `span ${d} / span ${d}` }), { autocomplete: 'col-span-<num>' }],
+				[/^col-start-(\d+)$/, ([, d]) => ({ 'grid-column-start': d }), { autocomplete: 'col-start-<num>' }],
 
 				// Sizing
 				['min-h-screen', { 'min-height': '100vh' }],
 
-				[/^w-(.*)/, ([, d], { theme }) => ({ width: theme.size?.[d as keyof typeof theme.size] || d })],
-				[/^min-w-(.*)$/, ([, d], { theme }) => ({ 'min-width': theme.size?.[d as keyof typeof theme.size] })],
-				[/^max-w-(.*)$/, ([, d], { theme }) => ({ 'max-width': theme.size?.[d as keyof typeof theme.size] || d })],
+				[
+					/^w-(.*)/,
+					([, d], { theme }) => ({ width: theme.size?.[d as keyof typeof theme.size] || theme.spacing?.[d as keyof typeof theme.spacing] }),
+					{
+						autocomplete: 'w-$size | w-$spacing',
+					},
+				],
+				[
+					/^min-w-(.*)$/,
+					([, d], { theme }) => ({
+						'min-width': theme.size?.[d as keyof typeof theme.size] || theme.spacing?.[d as keyof typeof theme.spacing],
+					}),
+				],
+				[
+					/^max-w-(.*)$/,
+					([, d], { theme }) => ({
+						'max-width': theme.size?.[d as keyof typeof theme.size] || theme.spacing?.[d as keyof typeof theme.spacing],
+					}),
+				],
 
-				[/^h-(.*)$/, ([, d], { theme }) => ({ height: theme.size?.[d as keyof typeof theme.size] })],
-				[/^min-h-(.*)$/, ([, d], { theme }) => ({ 'min-height': theme.size?.[d as keyof typeof theme.size] })],
-				[/^max-h-(.*)$/, ([, d], { theme }) => ({ 'max-height': theme.size?.[d as keyof typeof theme.size] })],
+				[
+					/^h-(.*)$/,
+					([, d], { theme }) => ({
+						height: theme.size?.[d as keyof typeof theme.size] || theme.spacing?.[d as keyof typeof theme.spacing],
+					}),
+				],
+				[
+					/^min-h-(.*)$/,
+					([, d], { theme }) => ({
+						'min-height': theme.size?.[d as keyof typeof theme.size] || theme.spacing?.[d as keyof typeof theme.spacing],
+					}),
+				],
+				[
+					/^max-h-(.*)$/,
+					([, d], { theme }) => ({
+						'max-height': theme.size?.[d as keyof typeof theme.size] || theme.spacing?.[d as keyof typeof theme.spacing],
+					}),
+				],
 
 				// Positioning
 				['absolute', { position: 'absolute' }],
@@ -167,29 +211,29 @@ export const presetDash = () => [
 					},
 				],
 				[
-					/^top-(\d+)$/,
-					([, d], { theme }) => ({ top: theme.spacing?.[d as keyof typeof theme.spacing] }),
+					/^(-?)top-(.+)$/,
+					([, sign, d], { theme }) => ({ top: `${sign}${theme.spacing?.[d as keyof typeof theme.spacing] || d}` }),
 					{
 						autocomplete: 'top-$spacing',
 					},
 				],
 				[
-					/^bottom-(\d+)$/,
-					([, d], { theme }) => ({ bottom: theme.spacing?.[d as keyof typeof theme.spacing] }),
+					/^(-?)bottom-(.+)$/,
+					([, sign, d], { theme }) => ({ bottom: `${sign}${theme.spacing?.[d as keyof typeof theme.spacing] || d}` }),
 					{
 						autocomplete: 'bottom-$spacing',
 					},
 				],
 				[
-					/^left-(\d+)$/,
-					([, d], { theme }) => ({ left: theme.spacing?.[d as keyof typeof theme.spacing] }),
+					/^(-?)left-(.+)$/,
+					([, sign, d], { theme }) => ({ left: `${sign}${theme.spacing?.[d as keyof typeof theme.spacing] || d}` }),
 					{
 						autocomplete: 'left-$spacing',
 					},
 				],
 				[
-					/^right-(\d+)$/,
-					([, d], { theme }) => ({ right: theme.spacing?.[d as keyof typeof theme.spacing] }),
+					/^(-?)right-(.+)$/,
+					([, sign, d], { theme }) => ({ right: `${sign}${theme.spacing?.[d as keyof typeof theme.spacing] || d}` }),
 					{
 						autocomplete: 'right-$spacing',
 					},
@@ -370,10 +414,12 @@ export const presetDash = () => [
 				[
 					/^text-(.+)$/,
 					([, c], { theme }) => {
+						if (c === 'current') return { color: 'var(--text-current, currentColor)' };
+
 						if (theme.colors.text[c as keyof typeof theme.colors.text])
 							return { color: theme.colors.text[c as keyof typeof theme.colors.text] };
 					},
-					{ autocomplete: 'text-$colors.text' },
+					{ autocomplete: ['text-$colors.text', 'text-current'] },
 				],
 				[
 					/^bg-(.+)$/,
@@ -393,11 +439,17 @@ export const presetDash = () => [
 				['rounded-xl', { 'border-radius': '0.75rem' }],
 				['rounded-2xl', { 'border-radius': '1rem' }],
 				['rounded-full', { 'border-radius': '9999px' }],
+
+				['border-dashed', { 'border-style': 'dashed' }],
 				[
-					/^border-(.+)/,
-					([, c], { theme }) => {
+					/^border-([^-]+)(?:-(.+))?$/,
+					([, c, style], { theme }) => {
 						if (theme.colors.border?.[c as keyof typeof theme.colors.border]) {
-							return { border: `1px solid ${theme.colors.border[c as keyof typeof theme.colors.border]}` };
+							return {
+								'border-width': '1px',
+								'border-style': style ?? 'solid',
+								'border-color': theme.colors.border[c as keyof typeof theme.colors.border],
+							};
 						}
 					},
 				],
@@ -418,6 +470,8 @@ export const presetDash = () => [
 				['cursor-pointer', { cursor: 'pointer' }],
 				['cursor-default', { cursor: 'default' }],
 				['cursor-not-allowed', { cursor: 'not-allowed' }],
+				['pointer-events-none', { 'pointer-events': 'none' }],
+				['pointer-events-auto', { 'pointer-events': 'auto' }],
 
 				['object-cover', { 'object-fit': 'cover' }],
 				['object-contain', { 'object-fit': 'contain' }],
@@ -425,11 +479,37 @@ export const presetDash = () => [
 				['aspect-square', { 'aspect-ratio': '1 / 1' }],
 				['aspect-video', { 'aspect-ratio': '16 / 9' }],
 
+				[
+					'sr-only',
+					{
+						position: 'absolute',
+						width: 1,
+						height: 1,
+						padding: 0,
+						margin: -1,
+						overflow: 'hidden',
+						clip: 'rect(0, 0, 0, 0)',
+						clipPath: 'inset(50%)',
+						whiteSpace: 'nowrap',
+						border: 0,
+					},
+				],
+
 				[/^opacity-(\d+)$/, ([, d]) => ({ opacity: Number(d) / 100 })],
+
+				// Transitions
+				['transition-none', { transition: 'none' }],
+				['transition-all', { transition: 'all 0.15s ease-in-out' }],
+				[/^duration-(\d+)$/, ([, d]) => ({ 'transition-duration': `${d}ms` }), { autocomplete: 'duration-<num>' }],
 
 				// Animations
 				['animate-spin', { animation: 'spin 1.5s linear infinite' }],
 				['animate-blip', { animation: 'blip 1.5s ease infinite' }],
+				['animate-skeleton', { animation: 'skeleton-loading 1.5s infinite' }],
+				['animate-fade-in', { animation: 'fade-in 0.3s ease-in-out' }],
+
+				['transform-none', { transform: 'none' }],
+				['transform-gpu', { transform: 'translate3d(0, 0, 0)' }],
 
 				// Outline
 				['outline-none', { outline: 'none' }],
@@ -447,16 +527,37 @@ export const presetDash = () => [
 			preflights: [
 				{
 					getCSS: () => `
-										@keyframes blip {
-											0%, 100% { opacity: 0; transform: scale(1); }
-											50% { opacity: 1; transform: scale(0.8); }
-										}
-										@keyframes spin {
-											0% { transform: rotate(90deg) scaleY(1); }
-											50% { transform: rotate(90deg) scaleY(-1); }
-											100% { transform: rotate(90deg) scaleY(1); }
-										}
-									`,
+
+						* {
+							box-sizing: border-box;
+						}
+
+						button {
+							border: none;
+							outline: none;
+							appearance: none;
+							background: none;
+							padding: 0;
+						}
+					
+						@keyframes blip {
+							0%, 100% { opacity: 0; transform: scale(1); }
+							50% { opacity: 1; transform: scale(0.8); }
+						}
+						@keyframes spin {
+							0% { transform: rotate(90deg) scaleY(1); }
+							50% { transform: rotate(90deg) scaleY(-1); }
+							100% { transform: rotate(90deg) scaleY(1); }
+						}
+						@keyframes skeleton-loading {
+							0% { background-position: 200% 0; }
+							100% { background-position: -200% 0; }
+						}
+						@keyframes fade-in {
+							from { opacity: 0; }
+							to { opacity: 1; }
+						}
+					`,
 				},
 			],
 
@@ -470,6 +571,13 @@ export const presetDash = () => [
 
 			variants: [
 				(matcher) => {
+					if (matcher.startsWith('active:hover:')) {
+						return {
+							matcher: matcher.slice(13),
+							selector: (s) => `${s}:hover:active, ${s}:hover[data-active="true"], ${s}:hover.active`,
+						};
+					}
+
 					if (matcher.startsWith('hover:')) {
 						return {
 							matcher: matcher.slice(6),
@@ -481,6 +589,13 @@ export const presetDash = () => [
 						return {
 							matcher: matcher.slice(6),
 							selector: (s) => `${s}:focus-visible`,
+						};
+					}
+
+					if (matcher.startsWith('focus-within:')) {
+						return {
+							matcher: matcher.slice(13),
+							selector: (s) => `${s}:focus-within`,
 						};
 					}
 
