@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { createContext, createEffect, createMemo, createSignal, For, JSX, Show, useContext } from 'solid-js';
+import { createContext, createEffect, createMemo, createSignal, For, JSX, useContext } from 'solid-js';
 import { Button } from '../button';
 import { Card } from '../card';
 import { Heading } from '../heading';
