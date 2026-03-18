@@ -216,13 +216,9 @@ export function Calendar(props: CalendarProps) {
 						props.isLoading && 'pointer-events-none animate-skeleton rounded-lg',
 					)}
 				>
-					<div class="text-center font-light p-1">Sun</div>
-					<div class="text-center font-light p-1">Mon</div>
-					<div class="text-center font-light p-1">Tue</div>
-					<div class="text-center font-light p-1">Wed</div>
-					<div class="text-center font-light p-1">Thu</div>
-					<div class="text-center font-light p-1">Fri</div>
-					<div class="text-center font-light p-1">Sat</div>
+					{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+						<div class="text-center font-light p-1">{day}</div>
+					))}
 					<For each={days()}>
 						{(day) => (
 							<button
@@ -241,7 +237,7 @@ export function Calendar(props: CalendarProps) {
 								onClick={() => handleDateClick(day)}
 							>
 								{day ? day.getDate() : ''}
-								{day && getRecipesForDate(day).length > 0 && <div class="w-1.5 h-1.5 bg-accent rounded-full mt-1"></div>}
+								{day && getRecipesForDate(day).length > 0 && <div class="absolute bottom-3 w-1.5 h-1.5 bg-accent rounded-full mt-1"></div>}
 							</button>
 						)}
 					</For>
@@ -249,10 +245,10 @@ export function Calendar(props: CalendarProps) {
 					<div class="pb-1" />
 					<Button
 						class={clsx(
-							'absolute mr shadow-lg col-start-7 justify-self-center transition-all duration-150',
-							showForm() ? '-bottom-74px' : '-bottom-38px',
+							'absolute col-start-7 justify-self-center transition-all duration-150',
+							showForm() ? '-bottom-74px' : '-bottom-38.5px',
 						)}
-						variant="outline"
+						variant="primary"
 						rounded="full"
 						size="icon"
 						aria-pressed={showForm()}

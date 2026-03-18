@@ -1,6 +1,8 @@
 import { A } from '@solidjs/router';
 import { onCleanup, onMount, type JSXElement } from 'solid-js';
 import { useTabsContext } from './tabsContext';
+import clsx from 'clsx';
+import { buttonVariantStyles } from '../button';
 
 export function TabLink(props: { href: string; children: JSXElement }) {
 	const context = useTabsContext();
@@ -25,7 +27,11 @@ export function TabLink(props: { href: string; children: JSXElement }) {
 
 	return (
 		<A
-			class="py-2 px-3 rounded-lg no-underline text-muted hocus:(text-default bg-100) active:(text-default bg-100)"
+			data-active={context.activeTab === props.href ? 'true' : 'false'}
+			class={clsx(
+				'rounded-lg no-underline flex-col items-center line-height-1',
+				buttonVariantStyles({ variant: 'ghost', size: 'default', rounded: 'default' }),
+			)}
 			role="tab"
 			aria-selected={context.activeTab === props.href}
 			href={props.href}

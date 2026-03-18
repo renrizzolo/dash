@@ -414,6 +414,10 @@ export const presetDash = () => [
 						return { 'font-size': s[0], 'line-height': s[1] };
 					},
 				],
+				// Note this comes after text size so that it can override line-height if needed
+				[/^line-height-(.+)$/, ([, lh]) => ({ 'line-height': lh }), { autocomplete: 'line-height-<num>' }],
+
+				// Text colors
 				[
 					/^text-(.+)$/,
 					([, c], { theme }) => {
@@ -424,6 +428,8 @@ export const presetDash = () => [
 					},
 					{ autocomplete: ['text-$colors.text', 'text-current'] },
 				],
+
+				// Backgrounds
 				[
 					/^bg-(.+)$/,
 					([, c], { theme }) => {

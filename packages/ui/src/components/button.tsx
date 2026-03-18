@@ -19,12 +19,12 @@ export type ButtonProps = {
 	ref?: (el: HTMLButtonElement) => void;
 } & Partial<ButtonVariants>;
 
-const variantStyles = createVariant<ButtonVariants>({
+export const buttonVariantStyles = createVariant<ButtonVariants>({
 	variant: {
-		default: 'bg-white border-default hover:bg-200 text-default',
-		ghost: 'hover:bg-100 text-current hover:text-default',
-		outline: 'bg-default border-default hover:bg-200 text-default',
-		primary: 'bg-inverse border-transparent hover:bg-inverse-muted text-inverse',
+		default: 'bg-white border-default hover:bg-200 text-default focus:ring-inverse active:(bg-inverse text-inverse)',
+		ghost: 'hover:bg-100 text-current hover:text-default  focus:ring-inverse active:(bg-inverse text-inverse)',
+		outline: 'bg-default border-default hover:bg-200 text-default focus:ring-inverse active:(bg-inverse text-inverse)',
+		primary: 'bg-inverse border-transparent hover:bg-inverse-muted text-inverse focus:ring-default active:(bg-inverse text-inverse)',
 	},
 	size: {
 		default: 'px-3 py-2 text-base',
@@ -44,9 +44,9 @@ export function Button(props: ButtonProps) {
 			ref={props.ref}
 			type={props.type || 'button'}
 			class={clsx(
-				'items-center flex-row  focus:ring-inverse justify-center cursor-pointer',
-				variantStyles({ variant: props.variant || 'default', size: props.size || 'default', rounded: props.rounded || 'default' }),
-				'active:(bg-inverse text-inverse)',
+				'items-center flex-row justify-center cursor-pointer',
+				buttonVariantStyles({ variant: props.variant || 'default', size: props.size || 'default', rounded: props.rounded || 'default' }),
+				'',
 				props.class,
 			)}
 			onClick={props.onClick}
