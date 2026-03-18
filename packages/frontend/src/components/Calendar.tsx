@@ -152,6 +152,20 @@ export function Calendar(props: CalendarProps) {
 
 	return (
 		<>
+			<button
+				onClick={() => {
+					toast.addToast({
+						title: 'Test',
+						message:
+							Math.random() < 0.5
+								? 'Unabled to load recipes'
+								: 'Another message that is a bit longer.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit.',
+						variant: 'default',
+					});
+				}}
+			>
+				Test Toast
+			</button>
 			<Card class="max-w-container mx-auto relative flex-col items-center gap-5">
 				<div class="grid grid-cols-7 gap-2 w-full font-mono text-lg font-bold items-center justify-center gap-3 mb-3">
 					<Button variant="ghost" size="icon" onClick={() => changeMonth(-1)}>
@@ -162,17 +176,6 @@ export function Calendar(props: CalendarProps) {
 							/>
 						</svg>
 					</Button>
-					<button
-						onClick={() => {
-							toast.addToast({
-								title: 'Test',
-								message: 'Unabled to load recipes',
-								variant: 'default',
-							});
-						}}
-					>
-						Test Toast
-					</button>
 					<span class="items-center flex-row gap-3 justify-center col-span-5">
 						{props.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
 						{selectedDateString() !== todayDateString() && (
