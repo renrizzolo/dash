@@ -4,6 +4,7 @@ import { Button } from '../button';
 import { Card } from '../card';
 import { Heading } from '../heading';
 import './toast.css';
+import { Text } from '../text';
 
 export type ToastProps = {
 	id: string;
@@ -13,7 +14,9 @@ export type ToastProps = {
 	action?: JSX.Element;
 	durationMs?: number;
 };
-const defaultDurationMs = 3000;
+
+const defaultDurationMs = 30000;
+const maxToasts = 10;
 
 function useToastContext() {
 	const [toasts, setToasts] = createSignal<ToastProps[]>([]);
@@ -24,7 +27,15 @@ function useToastContext() {
 
 	function addToast(toast: Omit<ToastProps, 'id' | 'element'>) {
 		const id = crypto.randomUUID();
-		setToasts((prev) => [...prev, { id, ...toast }]);
+
+		setToasts((prev) => {
+			if (prev.length >= maxToasts) {
+				// remove the oldest toast and add the new one
+				const updatedToasts = prev.slice(1);
+				return [...updatedToasts, { id, ...toast }];
+			}
+			return [...prev, { id, ...toast }];
+		});
 	}
 
 	function removeToast(id: string) {
@@ -71,17 +82,22 @@ export function ToastProvider(props: { children: JSX.Element }) {
 	const [isExpanded, setIsExpanded] = createSignal(false);
 	let timeoutId: number;
 
-	function handleMouseEnter() {
+	function handlePointerEnter() {
 		clearTimeout(timeoutId);
 		setIsExpanded(true);
 		toastContext.setIsPaused(true);
 	}
 
-	function handleMouseLeave() {
+	function handlePointerLeave(event: PointerEvent | FocusEvent) {
 		const timeSinceClose = Date.now() - toastContext.lastCloseTime();
 		const delay = timeSinceClose < 500 ? 1000 : 250;
-
+		const container = event.currentTarget as HTMLElement;
 		timeoutId = setTimeout(() => {
+			// if the pointer is still inside the container, do not collapse
+			if (container && container.matches(':hover')) {
+				return;
+			}
+
 			setIsExpanded(false);
 			toastContext.setIsPaused(false);
 		}, delay);
@@ -91,19 +107,35 @@ export function ToastProvider(props: { children: JSX.Element }) {
 		<ToastContext.Provider value={toastContext}>
 			{props.children}
 			<section
-				class="fixed flex-row justify-center bottom-5 w-vw p-4 z-2"
+				class="fixed flex-row justify-center bottom-5 w-vw z-2"
 				data-toast-container
 				data-expanded={isExpanded()}
 				aria-live="polite"
 				aria-atomic="false"
 				aria-relevant="additions text"
-				onMouseEnter={handleMouseEnter}
-				onMouseLeave={handleMouseLeave}
-				onFocusIn={handleMouseEnter}
-				onFocusOut={handleMouseLeave}
+				onPointerEnter={handlePointerEnter}
+				onPointerLeave={handlePointerLeave}
+				onFocusIn={handlePointerEnter}
+				onFocusOut={handlePointerLeave}
 			>
 				<For each={toastContext.toasts()}>{(toast) => <Toast toast={toast} />}</For>
 			</section>
+			{/* this is a mask/pointer area behind the toasts; 
+				anchor positioned to the oldest toast's top */}
+			<div
+				class="fixed"
+				style={{
+					'position-anchor': '--toast-anchor',
+					bottom: 0,
+					width: '640px',
+					top: 'calc(anchor(top) - 20px)',
+					left: 'calc(50%)',
+					right: '100%',
+					transform: 'translateX(-50%)',
+				}}
+				onPointerEnter={handlePointerEnter}
+				onPointerLeave={handlePointerLeave}
+			/>
 		</ToastContext.Provider>
 	);
 }
@@ -121,37 +153,47 @@ function Toast(props: { toast: ToastProps }) {
 	const { removeToast, toasts } = useToast();
 
 	const [coords, setCoords] = createSignal({ collapsed: 0, expanded: 0 });
+	const index = createMemo(() => toasts().findIndex((t) => t.id === props.toast.id));
 
 	createEffect(() => {
 		const allToasts = toasts();
-		const index = allToasts.findIndex((t) => t.id === props.toast.id);
-		const reverseIndex = allToasts.length - 1 - index;
+		const toastIndex = index();
+		if (toastIndex === -1) return;
 
 		const newestToast = allToasts[allToasts.length - 1];
-		const newestToastHeight = (document.querySelector(`[data-toast="${newestToast?.id}"]`) as HTMLElement)?.offsetHeight || 0;
+		const newerToasts = allToasts.slice(toastIndex + 1);
 
-		const collapsed = newestToastHeight - 18 + reverseIndex * 18;
+		const newestHeight = (document.querySelector(`[data-toast="${newestToast.id}"]`) as HTMLElement)?.offsetHeight || 0;
+		const myHeight = (document.querySelector(`[data-toast="${props.toast.id}"]`) as HTMLElement)?.offsetHeight || 0;
 
-		const expanded = allToasts.slice(index + 1).reduce((acc, curr) => {
-			return acc + ((document.querySelector(`[data-toast="${curr.id}"]`) as HTMLElement)?.offsetHeight || 0) + 12;
+		// Expanded logic: total height of newer toasts + gaps
+		const expanded = newerToasts.reduce((acc, curr) => {
+			const height = (document.querySelector(`[data-toast="${curr.id}"]`) as HTMLElement)?.offsetHeight || 0;
+			return acc + height + 12;
 		}, 0);
+
+		// Collapsed logic: exactly 18px between each toast top
+		const collapsed = newestHeight - myHeight + newerToasts.length * 18;
 
 		setCoords({ collapsed, expanded });
 	});
 
-	const reverseIndex = createMemo(() => toasts().length - 1 - toasts().findIndex((t) => t.id === props.toast.id));
+	const reverseIndex = createMemo(() => toasts().length - 1 - index());
 
 	return (
 		<Card
 			data-toast={props.toast.id}
 			class={clsx(
-				'absolute bottom-0  max-w-container w-full transition-all shadow-lg animate-fade-in',
-				props.toast.variant === 'error' ? 'bg-error text-inverse' : 'bg-default text-default border-default'
+				'flex-col gap-1 absolute bottom-0 max-w-container transition-all shadow-lg animate-slide-in w-bound',
+				props.toast.variant === 'error' ? 'bg-error text-inverse' : 'bg-default text-default border-default',
 			)}
 			style={{
 				'--toast-index': `${reverseIndex()}`,
 				'--toast-offset': `${coords().collapsed}`,
 				'--toast-offset-expanded': `${coords().expanded}`,
+				// TODO - this isn't necessarily the highest toast, as an older one that's taller could be above it
+				'anchor-name': index() === 0 ? '--toast-anchor' : undefined,
+				'z-index': reverseIndex() === 0 ? 1 : undefined,
 			}}
 			variant={props.toast.variant}
 		>
@@ -167,7 +209,7 @@ function Toast(props: { toast: ToastProps }) {
 				<span class="i-tabler:x w-5 h-5" aria-hidden="true"></span>
 			</Button>
 			<Heading level={2}>{props.toast.title}</Heading>
-			<div>{props.toast.message}</div>
+			<Text whiteSpace="pre-wrap">{props.toast.message}</Text>
 			{props.toast.action && <div class="mt-4">{props.toast.action}</div>}
 		</Card>
 	);
