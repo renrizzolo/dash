@@ -58,7 +58,7 @@ function useToastContext() {
 		} else {
 			currentToasts.forEach((toast) => {
 				if (toast.durationMs !== 0 && !timeoutIds.has(toast.id)) {
-					const timeoutId = setTimeout(() => removeToast(toast.id), toast.durationMs ?? defaultDurationMs);
+					const timeoutId = setTimeout(() => removeToast(toast.id), toast.durationMs ?? defaultDurationMs) as unknown as number;
 					timeoutIds.set(toast.id, timeoutId);
 				}
 			});
@@ -100,7 +100,8 @@ export function ToastProvider(props: { children: JSX.Element }) {
 
 			setIsExpanded(false);
 			toastContext.setIsPaused(false);
-		}, delay);
+			// TODO - oxlint is complaining about Type 'Timeout' is not assignable to type 'number', but it's a number
+		}, delay) as unknown as number;
 	}
 
 	return (
