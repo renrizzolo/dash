@@ -1,5 +1,3 @@
-import '@unocss/reset/eric-meyer.css';
-
 import { type RouteSectionProps } from '@solidjs/router';
 import { TabLink, Tabs, ToastProvider } from 'ui/components';
 
