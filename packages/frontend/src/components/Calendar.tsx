@@ -33,6 +33,8 @@ export function Calendar(props: CalendarProps) {
 	const [newRecipeTags, setNewRecipeTags] = createSignal('');
 	const [newRecipeImage, setNewRecipeImage] = createSignal<File | null>(null);
 
+	const toast = useToast();
+
 	createEffect(() => {
 		const viewDate = props.currentDate;
 		const today = new Date();
@@ -108,16 +110,31 @@ export function Calendar(props: CalendarProps) {
 			date: toLocalDateString(selectedDate()!),
 			image: imageKey,
 		};
+		try {
+			await addRecipe(recipe);
 
-		await addRecipe(recipe);
-		props.refetch();
+			props.refetch();
 
-		setShowForm(false);
-		setNewRecipeName('');
-		setNewRecipeDesc('');
-		setNewRecipeUrl(null);
-		setNewRecipeTags('');
-		setNewRecipeImage(null);
+			setShowForm(false);
+			setNewRecipeName('');
+			setNewRecipeDesc('');
+			setNewRecipeUrl(null);
+			setNewRecipeTags('');
+			setNewRecipeImage(null);
+
+			toast.addToast({
+				title: 'Success',
+				message: `${recipe.name} added successfully!`,
+				variant: 'default',
+			});
+		} catch (error) {
+			console.error('Failed to add recipe:', error);
+			toast.addToast({
+				title: 'Error',
+				message: 'Failed to add recipe. Please try again.',
+				variant: 'error',
+			});
+		}
 	};
 
 	const changeMonth = (offset: number) => {
@@ -125,8 +142,6 @@ export function Calendar(props: CalendarProps) {
 		newDate.setMonth(newDate.getMonth() + offset);
 		props.onMonthChange(newDate);
 	};
-
-	const toast = useToast();
 
 	createEffect(() => {
 		if (props.isError) {
@@ -152,22 +167,8 @@ export function Calendar(props: CalendarProps) {
 
 	return (
 		<>
-			<button
-				onClick={() => {
-					toast.addToast({
-						title: 'Test',
-						message:
-							Math.random() < 0.5
-								? 'Unabled to load recipes'
-								: 'Another message that is a bit longer.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit.',
-						variant: 'default',
-					});
-				}}
-			>
-				Test Toast
-			</button>
 			<Card class="max-w-container mx-auto relative flex-col items-center gap-5">
-				<div class="grid grid-cols-7 gap-2 w-full font-mono text-lg font-bold items-center justify-center gap-3 mb-3">
+				<div class="grid grid-cols-7 gap-2 w-full text-md font-bold items-center justify-center gap-3 mb-3">
 					<Button variant="ghost" size="icon" onClick={() => changeMonth(-1)}>
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
 							<path
@@ -176,10 +177,10 @@ export function Calendar(props: CalendarProps) {
 							/>
 						</svg>
 					</Button>
-					<span class="items-center flex-row gap-3 justify-center col-span-5">
+					<div class="items-center flex-row gap-3 text-lg justify-center col-span-5">
 						{props.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
 						{selectedDateString() !== todayDateString() && (
-							<Button variant="outline" size="icon" onClick={goToToday}>
+							<Button variant="outline" size="icon" onClick={goToToday} aria-label="Go to today">
 								<svg
 									width={16}
 									height={16}
@@ -199,7 +200,7 @@ export function Calendar(props: CalendarProps) {
 								</svg>
 							</Button>
 						)}
-					</span>
+					</div>
 					<Button variant="ghost" size="icon" class="justify-self-end" onClick={() => changeMonth(1)}>
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
 							<path
@@ -211,17 +212,17 @@ export function Calendar(props: CalendarProps) {
 				</div>
 				<div
 					class={clsx(
-						'grid grid-cols-7 gap-2 w-full relative font-mono',
+						'grid grid-cols-7 gap-2 w-full relative font-semibold',
 						props.isLoading && 'pointer-events-none animate-skeleton rounded-lg',
 					)}
 				>
-					<div class="text-center font-bold p-1">Sun</div>
-					<div class="text-center font-bold p-1">Mon</div>
-					<div class="text-center font-bold p-1">Tue</div>
-					<div class="text-center font-bold p-1">Wed</div>
-					<div class="text-center font-bold p-1">Thu</div>
-					<div class="text-center font-bold p-1">Fri</div>
-					<div class="text-center font-bold p-1">Sat</div>
+					<div class="text-center font-light p-1">Sun</div>
+					<div class="text-center font-light p-1">Mon</div>
+					<div class="text-center font-light p-1">Tue</div>
+					<div class="text-center font-light p-1">Wed</div>
+					<div class="text-center font-light p-1">Thu</div>
+					<div class="text-center font-light p-1">Fri</div>
+					<div class="text-center font-light p-1">Sat</div>
 					<For each={days()}>
 						{(day) => (
 							<button
@@ -230,9 +231,9 @@ export function Calendar(props: CalendarProps) {
 								data-active={day && selectedDateString() && toLocalDateString(day) === selectedDateString()}
 								class={clsx(
 									'aspect-square flex-col items-center justify-center rounded-lg cursor-pointer relative transition-all p-0',
-									'bg-700 text-inverse hover:bg-900',
-									'focus:(ring-inverse bg-500)',
-									'active:bg-500 active:hover:bg-600',
+									'bg-600 text-inverse hover:bg-800',
+									'focus:(ring-default bg-700)',
+									'active:bg-800 active:hover:bg-900',
 									// today
 									day && toLocalDateString(day) === todayDateString() ? 'outline-highlight' : '',
 									!day && 'invisible pointer-events-none',
@@ -244,10 +245,11 @@ export function Calendar(props: CalendarProps) {
 							</button>
 						)}
 					</For>
-
+					{/* add a spacer so that the fab button doesn't overlap the last row when there are 31 days */}
+					<div class="pb-1" />
 					<Button
 						class={clsx(
-							'absolute shadow-lg col-start-7 justify-self-center transition-all duration-150',
+							'absolute mr shadow-lg col-start-7 justify-self-center transition-all duration-150',
 							showForm() ? '-bottom-74px' : '-bottom-38px',
 						)}
 						variant="outline"
@@ -348,7 +350,23 @@ export function Calendar(props: CalendarProps) {
 						onChange={(e) => setNewRecipeImage(e.currentTarget.files ? e.currentTarget.files[0] : null)}
 					/>
 
-					<Button type="submit">Save</Button>
+					<Button variant="primary" type="submit">
+						Save
+					</Button>
+					<Button
+						onClick={() => {
+							toast.addToast({
+								title: 'Test',
+								message:
+									Math.random() < 0.5
+										? 'Unabled to load recipes'
+										: 'Another message that is a bit longer.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit.',
+								variant: 'default',
+							});
+						}}
+					>
+						Test Toast
+					</Button>
 				</form>
 			</Show>
 			<div class="pt-8">
@@ -356,10 +374,10 @@ export function Calendar(props: CalendarProps) {
 					<div class="w-full">
 						<For each={getRecipesForDate(selectedDate()!)}>
 							{(recipe) => (
-								<Card class="mb-6 animate-fade-in flex-row gap-2 items-start">
-									<div class="flex-col gap-2 flex-1">
-										<h4 class="font-bold">{recipe.name}</h4>
-										<p>{recipe.description}</p>
+								<Card class="my-6 animate-fade-in flex-col gap-4 items-start">
+									<div class="flex-col gap-1 flex-1">
+										<h4 class="font-bold text-2xl">{recipe.name}</h4>
+										{recipe.description && <p class="text-sm">{recipe.description}</p>}
 										{recipe.url && (
 											<p>
 												<a href={recipe.url} target="_blank" rel="noopener noreferrer" class="underline hover:text-muted">
@@ -367,10 +385,12 @@ export function Calendar(props: CalendarProps) {
 												</a>
 											</p>
 										)}
-										<div class="flex-wrap gap-1.5 mt-auto">
+									</div>
+									{recipe.tags.length > 0 && (
+										<div class="flex-wrap flex-row gap-1.5 mt-auto">
 											<For each={recipe.tags}>{(tag) => <Badge>{tag}</Badge>}</For>
 										</div>
-									</div>
+									)}
 									{recipe.image && (
 										<img src={`/api/recipes/images/${recipe.image}`} alt={recipe.name} class="w-full object-cover aspect-square rounded" />
 									)}
