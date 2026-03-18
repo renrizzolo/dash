@@ -15,7 +15,7 @@ export type ToastProps = {
 	durationMs?: number;
 };
 
-const defaultDurationMs = 30000;
+const defaultDurationMs = 15000;
 const maxToasts = 10;
 
 function useToastContext() {

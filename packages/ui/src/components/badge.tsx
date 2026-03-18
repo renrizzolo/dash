@@ -7,5 +7,5 @@ export interface BadgeProps {
 }
 
 export function Badge(props: BadgeProps) {
-	return <div class={clsx('bg-default text-default px-1 py-0.5 rounded text-xs font-medium uppercase', props.class)}>{props.children}</div>;
+	return <div class={clsx('bg-100 text-muted px-2 py-0.5 line-height-1 rounded text-sm w-max', props.class)}>{props.children}</div>;
 }

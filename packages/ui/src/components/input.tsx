@@ -15,7 +15,7 @@ export function Input(props: InputProps) {
 					{props.label}
 				</label>
 			)}
-			<input {...props} class={clsx('w-full px-5 py-4 rounded-md border-inverse bg-50 focus:ring-default ', props.class)} />
+			<input {...props} class={clsx('text-base w-full px-5 py-4 rounded-md border-inverse bg-50 focus:ring-default', props.class)} />
 			{props.error && <span class="text-xs text-error">{props.error}</span>}
 		</div>
 	);

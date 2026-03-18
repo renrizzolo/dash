@@ -3,7 +3,7 @@ import type { JSX } from 'solid-js';
 import { createVariant } from '../styles/createVariant';
 
 type ButtonVariants = {
-	variant?: 'default' | 'ghost' | 'outline';
+	variant?: 'default' | 'ghost' | 'outline' | 'primary';
 	rounded?: 'default' | 'full';
 	size?: 'default' | 'small' | 'icon' | 'icon-small';
 };
@@ -24,6 +24,7 @@ const variantStyles = createVariant<ButtonVariants>({
 		default: 'bg-white border-default hover:bg-200 text-default',
 		ghost: 'hover:bg-100 text-current hover:text-default',
 		outline: 'bg-default border-default hover:bg-200 text-default',
+		primary: 'bg-inverse border-transparent hover:bg-inverse-muted text-inverse',
 	},
 	size: {
 		default: 'px-3 py-2 text-base',
@@ -46,7 +47,7 @@ export function Button(props: ButtonProps) {
 				'items-center flex-row  focus:ring-inverse justify-center cursor-pointer',
 				variantStyles({ variant: props.variant || 'default', size: props.size || 'default', rounded: props.rounded || 'default' }),
 				'active:(bg-inverse text-inverse)',
-				props.class
+				props.class,
 			)}
 			onClick={props.onClick}
 			aria-label={props['aria-label']}

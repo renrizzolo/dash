@@ -34,6 +34,7 @@ export const presetDash = () => [
 						900: '#171717',
 					},
 					border: {
+						transparent: 'transparent',
 						default: '#DDDDDD',
 						highlight: '#404040',
 						inverse: '#333333',
@@ -205,7 +206,7 @@ export const presetDash = () => [
 				['fixed', { position: 'fixed' }],
 				['sticky', { position: 'sticky' }],
 				[
-					/^inset-(\d+)$/,
+					/^inset-([\d.]+)$/,
 					([, d], { theme }) => ({ inset: theme.spacing?.[d as keyof typeof theme.spacing] }),
 					{
 						autocomplete: 'inset-$spacing',
@@ -243,14 +244,14 @@ export const presetDash = () => [
 
 				// Spacing
 				[
-					/^p-(\d+)$/,
+					/^p-([\d.]+)$/,
 					([, d], { theme }) => ({ padding: theme.spacing?.[d as keyof typeof theme.spacing] || d }),
 					{
 						autocomplete: 'p-$spacing',
 					},
 				],
 				[
-					/^px-(\d+)$/,
+					/^px-([\d.]+)$/,
 					([, d], { theme }) => ({
 						'padding-left': theme.spacing?.[d as keyof typeof theme.spacing] || d,
 						'padding-right': theme.spacing?.[d as keyof typeof theme.spacing] || d,
@@ -260,7 +261,7 @@ export const presetDash = () => [
 					},
 				],
 				[
-					/^py-(\d+)$/,
+					/^py-([\d.]+)$/,
 					([, d], { theme }) => ({
 						'padding-top': theme.spacing?.[d as keyof typeof theme.spacing] || d,
 						'padding-bottom': theme.spacing?.[d as keyof typeof theme.spacing] || d,
@@ -270,28 +271,28 @@ export const presetDash = () => [
 					},
 				],
 				[
-					/^pt-(\d+)$/,
+					/^pt-([\d.]+)$/,
 					([, d], { theme }) => ({ 'padding-top': theme.spacing?.[d as keyof typeof theme.spacing] || d }),
 					{
 						autocomplete: 'pt-$spacing',
 					},
 				],
 				[
-					/^pb-(\d+)$/,
+					/^pb-([\d.]+)$/,
 					([, d], { theme }) => ({ 'padding-bottom': theme.spacing?.[d as keyof typeof theme.spacing] || d }),
 					{
 						autocomplete: 'pb-$spacing',
 					},
 				],
 				[
-					/^ps-(\d+)$/,
+					/^ps-([\d.]+)$/,
 					([, d], { theme }) => ({ 'padding-inline-start': theme.spacing?.[d as keyof typeof theme.spacing] || d }),
 					{
 						autocomplete: 'ps-$spacing',
 					},
 				],
 				[
-					/^pe-(\d+)$/,
+					/^pe-([\d.]+)$/,
 					([, d], { theme }) => ({ 'padding-inline-end': theme.spacing?.[d as keyof typeof theme.spacing] || d }),
 					{
 						autocomplete: 'pe-$spacing',
@@ -299,14 +300,14 @@ export const presetDash = () => [
 				],
 
 				[
-					/^m-(\d+)$/,
+					/^m-([\d.]+)$/,
 					([, d], { theme }) => ({ margin: theme.spacing?.[d as keyof typeof theme.spacing] || d }),
 					{
 						autocomplete: 'm-$spacing',
 					},
 				],
 				[
-					/^mx-(\d+)$/,
+					/^mx-([\d.]+)$/,
 					([, d], { theme }) => ({
 						'margin-left': theme.spacing?.[d as keyof typeof theme.spacing] || d,
 						'margin-right': theme.spacing?.[d as keyof typeof theme.spacing] || d,
@@ -316,7 +317,7 @@ export const presetDash = () => [
 					},
 				],
 				[
-					/^my-(\d+)$/,
+					/^my-([\d.]+)$/,
 					([, d], { theme }) => ({
 						'margin-top': theme.spacing?.[d as keyof typeof theme.spacing] || d,
 						'margin-bottom': theme.spacing?.[d as keyof typeof theme.spacing] || d,
@@ -326,28 +327,28 @@ export const presetDash = () => [
 					},
 				],
 				[
-					/^mt-(\d+)$/,
+					/^mt-([\d.]+)$/,
 					([, d], { theme }) => ({ 'margin-top': theme.spacing?.[d as keyof typeof theme.spacing] || d }),
 					{
 						autocomplete: 'mt-$spacing',
 					},
 				],
 				[
-					/^mb-(\d+)$/,
+					/^mb-([\d.]+)$/,
 					([, d], { theme }) => ({ 'margin-bottom': theme.spacing?.[d as keyof typeof theme.spacing] || d }),
 					{
 						autocomplete: 'mb-$spacing',
 					},
 				],
 				[
-					/^ms-(\d+)$/,
+					/^ms-([\d.]+)$/,
 					([, d], { theme }) => ({ 'margin-inline-start': theme.spacing?.[d as keyof typeof theme.spacing] || d }),
 					{
 						autocomplete: 'ms-$spacing',
 					},
 				],
 				[
-					/^me-(\d+)$/,
+					/^me-([\d.]+)$/,
 					([, d], { theme }) => ({ 'margin-inline-end': theme.spacing?.[d as keyof typeof theme.spacing] || d }),
 					{
 						autocomplete: 'me-$spacing',
@@ -358,7 +359,7 @@ export const presetDash = () => [
 				['my-auto', { 'margin-top': 'auto', 'margin-bottom': 'auto' }],
 
 				[
-					/^gap-(\d+)$/,
+					/^gap-([\d.]+)$/,
 					([, d], { theme }) => ({ gap: theme.spacing?.[d as keyof typeof theme.spacing] }),
 					{ autocomplete: 'gap-$spacing' },
 				],
@@ -535,6 +536,10 @@ export const presetDash = () => [
 							box-sizing: border-box;
 						}
 
+						input, select, textarea {
+							font-family: inherit;
+						}
+
 						button {
 							border: none;
 							outline: none;
@@ -577,7 +582,7 @@ export const presetDash = () => [
 
 			shortcuts: [
 				[
-					/^stack-(center|start|end|stretch)-(\d+)$/,
+					/^stack-(center|start|end|stretch)-([\d.]+)$/,
 					([, alignment, size]) => `flex-col items-${alignment} gap-${size}`,
 					{ autocomplete: ['stack-center-$spacing', 'stack-start-$spacing', 'stack-end-$spacing', 'stack-justify-$spacing'] },
 				],

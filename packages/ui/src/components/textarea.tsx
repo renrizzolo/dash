@@ -15,7 +15,7 @@ export function TextArea(props: TextAreaProps) {
 					{props.label}
 				</label>
 			)}
-			<textarea {...props} class={clsx('w-full px-4 py-4 rounded-md border-inverse bg-50 focus:ring-default', props.class)} />
+			<textarea {...props} class={clsx('text-base w-full px-4 py-4 rounded-md border-inverse bg-50 focus:ring-default', props.class)} />
 			{props.error && <span class="text-xs text-accent">{props.error}</span>}
 		</div>
 	);
