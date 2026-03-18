@@ -60,7 +60,7 @@ export const presetDash = () => [
 						'"Noto Color Emoji"',
 					].join(', '),
 					mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', 'monospace'].join(
-						', '
+						', ',
 					),
 				},
 				breakpoints: {
@@ -102,6 +102,7 @@ export const presetDash = () => [
 					min: 'min-content',
 					max: 'max-content',
 					full: '100%',
+					bound: 'calc(100% - 2rem)',
 					vw: '100vw',
 					vh: '100vh',
 				},
@@ -386,7 +387,8 @@ export const presetDash = () => [
 				['underline', { 'text-decoration': 'underline' }],
 				['no-underline', { 'text-decoration': 'none' }],
 				['text-strike', { 'text-decoration': 'line-through' }],
-
+				['white-space-nowrap', { 'white-space': 'nowrap' }],
+				['white-space-pre-wrap', { 'white-space': 'pre-wrap' }],
 				[
 					'text-box-trim',
 					{
@@ -507,6 +509,7 @@ export const presetDash = () => [
 				['animate-blip', { animation: 'blip 1.5s ease infinite' }],
 				['animate-skeleton', { animation: 'skeleton-loading 1.5s infinite' }],
 				['animate-fade-in', { animation: 'fade-in 0.3s ease-in-out' }],
+				['animate-slide-in', { animation: 'slide-in 0.3s ease-out' }],
 
 				['transform-none', { transform: 'none' }],
 				['transform-gpu', { transform: 'translate3d(0, 0, 0)' }],
@@ -557,6 +560,17 @@ export const presetDash = () => [
 							from { opacity: 0; }
 							to { opacity: 1; }
 						}
+						@keyframes slide-in {
+							from {
+								opacity: 0.5;
+								transform: translateY(100%);
+							}
+							to {
+								opacity: 1;
+								transform: translateY(0);
+							}
+						}
+					
 					`,
 				},
 			],

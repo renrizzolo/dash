@@ -209,7 +209,7 @@ export function Calendar(props: CalendarProps) {
 				<div
 					class={clsx(
 						'grid grid-cols-7 gap-2 w-full relative font-mono',
-						props.isLoading && 'pointer-events-none animate-skeleton rounded-lg'
+						props.isLoading && 'pointer-events-none animate-skeleton rounded-lg',
 					)}
 				>
 					<div class="text-center font-bold p-1">Sun</div>
@@ -232,7 +232,7 @@ export function Calendar(props: CalendarProps) {
 									'active:bg-500 active:hover:bg-600',
 									// today
 									day && toLocalDateString(day) === todayDateString() ? 'outline-highlight' : '',
-									!day && 'invisible pointer-events-none'
+									!day && 'invisible pointer-events-none',
 								)}
 								onClick={() => handleDateClick(day)}
 							>
@@ -245,7 +245,7 @@ export function Calendar(props: CalendarProps) {
 					<Button
 						class={clsx(
 							'absolute shadow-lg col-start-7 justify-self-center transition-all duration-150',
-							showForm() ? '-bottom-74px' : '-bottom-38px'
+							showForm() ? '-bottom-74px' : '-bottom-38px',
 						)}
 						variant="outline"
 						rounded="full"

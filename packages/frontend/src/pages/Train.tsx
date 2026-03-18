@@ -17,7 +17,7 @@ export function Train() {
 			setDateTimeNow(new Date());
 
 			if (countdown() === REFRESH_INTERVAL_SECONDS) {
-				refetch();
+				void refetch();
 				setCountdown(0);
 			}
 		}, 1000);

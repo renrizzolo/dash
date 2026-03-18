@@ -2,8 +2,8 @@ export function createVariant<TProps extends Record<string, string | boolean | u
 	[key in keyof TProps]?: NonNullable<TProps[key]> extends boolean
 		? { true: string; false: string }
 		: NonNullable<TProps[key]> extends string | number | symbol
-		? Partial<Record<NonNullable<TProps[key]>, string>>
-		: never;
+			? Partial<Record<NonNullable<TProps[key]>, string>>
+			: never;
 }) {
 	const variants = Object.keys(input) as Array<keyof TProps>;
 	return (props: Partial<TProps>) => {
@@ -21,7 +21,9 @@ export function createVariant<TProps extends Record<string, string | boolean | u
 
 				if (propValue && variantConfig) {
 					const stringConfig = variantConfig as Record<string, string>;
+					// oxlint-disable-next-line no-unnecessary-type-assertion
 					if ((propValue as string) in stringConfig) {
+						// oxlint-disable-next-line no-unnecessary-type-assertion
 						return stringConfig[propValue as string];
 					}
 				}
