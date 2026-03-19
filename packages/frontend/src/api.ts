@@ -13,19 +13,19 @@ type APIEndpoint = (typeof apiRoutes)[keyof typeof apiRoutes];
 type ApiReturnType<T extends APIEndpoint> = T extends '/api/trains'
 	? Departure[]
 	: T extends '/api/recipes'
-	? Recipe[]
-	: T extends '/api/recipes/upload'
-	? { key: string }
-	: T extends `/api/recipes/images`
-	? { key: string }
-	: T extends '/api/auth/user'
-	? { email: string }
-	: never;
+		? Recipe[]
+		: T extends '/api/recipes/upload'
+			? { keys: string[] }
+			: T extends `/api/recipes/images`
+				? { key: string }
+				: T extends '/api/auth/user'
+					? { email: string }
+					: never;
 
 async function apiFetch<T extends APIEndpoint>(
 	endpoint: T,
 	searchParams?: Record<string, string | number | undefined>,
-	options?: RequestInit
+	options?: RequestInit,
 ): Promise<ApiReturnType<T>> {
 	let params: URLSearchParams | null = null;
 
@@ -73,21 +73,26 @@ export async function addRecipe(recipe: Omit<Recipe, 'id'>) {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify(recipe),
-		}
+		},
 	);
 }
 
-export async function uploadImage(file: File | Blob) {
+export async function uploadImages(files: (File | Blob)[]) {
+	const formData = new FormData();
+	files.forEach((file, index) => {
+		formData.append(`file-${index}`, file);
+	});
+
 	const response = await apiFetch(
 		'/api/recipes/upload',
 		{},
 		{
 			method: 'PUT',
-			body: file,
-		}
+			body: formData,
+		},
 	);
 
-	return response.key;
+	return response.keys;
 }
 
 export async function checkAuth() {

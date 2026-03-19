@@ -504,6 +504,9 @@ export const presetDash = () => [
 					},
 				],
 
+				['overflow-hidden', { overflow: 'hidden' }],
+				['overflow-auto', { overflow: 'auto' }],
+				['overflow-scroll', { overflow: 'scroll' }],
 				[/^opacity-(\d+)$/, ([, d]) => ({ opacity: Number(d) / 100 })],
 
 				// Transitions
@@ -635,6 +638,13 @@ export const presetDash = () => [
 						return {
 							matcher: matcher.slice(6),
 							selector: (s) => `${s}:hover, ${s}:focus-visible`,
+						};
+					}
+
+					if (matcher.startsWith('before:')) {
+						return {
+							matcher: matcher.slice(8),
+							selector: (s) => `${s}::before`,
 						};
 					}
 

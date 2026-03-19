@@ -250,20 +250,30 @@ export default {
 
 		if (url.pathname === apiRoutes.recipeUpload && request.method === 'PUT') {
 			try {
-				const key = crypto.randomUUID();
-				const contentType = request.headers.get('Content-Type');
+				const formData = await request.formData();
+				const uploadPromises: Promise<{ key: string }>[] = [];
 
-				await env.RECIPES_BUCKET.put(key, request.body, {
-					httpMetadata: {
-						contentType: contentType?.toString(),
-					},
-				});
-				return new Response(JSON.stringify({ key }), {
+				for (const value of formData.values()) {
+					if (value instanceof File) {
+						const key = crypto.randomUUID();
+						const promise = env.RECIPES_BUCKET.put(key, value.stream(), {
+							httpMetadata: {
+								contentType: value.type,
+							},
+						}).then(() => ({ key }));
+						uploadPromises.push(promise);
+					}
+				}
+
+				const results = await Promise.all(uploadPromises);
+				const keys = results.map((r) => r.key);
+
+				return new Response(JSON.stringify({ keys }), {
 					headers: { 'Content-Type': 'application/json' },
 				});
 			} catch (e) {
-				console.error('Error uploading file:', e);
-				return new Response('Error uploading file', { status: 500 });
+				console.error('Error uploading files:', e);
+				return new Response('Error uploading files', { status: 500 });
 			}
 		}
 

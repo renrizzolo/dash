@@ -5,7 +5,7 @@ export interface Recipe {
 	description: string;
 	url: string | null;
 	tags: string[];
-	image?: string; // Key/URL of the uploaded image
+	images?: string[]; // Key/URL of the uploaded images
 }
 
 export type RecipeParams = {
