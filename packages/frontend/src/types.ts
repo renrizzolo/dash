@@ -6,6 +6,8 @@ export interface Recipe {
 	url: string | null;
 	tags: string[];
 	images?: string[]; // Key/URL of the uploaded images
+	/** @deprecated Use `images` instead. */
+	image?: string;
 }
 
 export type RecipeParams = {
