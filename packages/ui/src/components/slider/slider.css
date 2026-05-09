@@ -1,0 +1,14 @@
+[data-slider-container] {
+	scroll-snap-type: x mandatory;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+
+	& > * {
+		scroll-snap-align: start;
+		/* transition: all 150ms ease; */
+	}
+}

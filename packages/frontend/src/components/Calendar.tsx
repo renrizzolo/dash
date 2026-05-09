@@ -1,11 +1,11 @@
 // TODO - solid doesn't accept htmlFor
 // oxlint-disable label-has-associated-control
-import { createSignal, createEffect, For, Show } from 'solid-js';
+import { createSignal, createEffect, For, Show, onCleanup } from 'solid-js';
 import { clsx } from 'clsx';
-import { addRecipe, uploadImage } from '../api';
+import { addRecipe, uploadImages } from '../api';
 import { compressImage } from '../utils';
 import type { Recipe } from '../types';
-import { LoadingBlip, Card, Button, Input, TextArea, Badge, FileInput, useToast } from 'ui/components';
+import { LoadingBlip, Card, Button, Input, TextArea, Badge, FileInput, useToast, Slider } from 'ui/components';
 
 interface CalendarProps {
 	recipes: Recipe[] | undefined;
@@ -15,6 +15,11 @@ interface CalendarProps {
 	isLoading: boolean;
 	isFetching: boolean;
 	isError: boolean;
+}
+
+interface NewRecipeImage {
+	file: File;
+	url: string;
 }
 
 function toLocalDateString(date: Date) {
@@ -31,7 +36,7 @@ export function Calendar(props: CalendarProps) {
 	const [newRecipeDesc, setNewRecipeDesc] = createSignal('');
 	const [newRecipeUrl, setNewRecipeUrl] = createSignal<string | null>(null);
 	const [newRecipeTags, setNewRecipeTags] = createSignal('');
-	const [newRecipeImage, setNewRecipeImage] = createSignal<File | null>(null);
+	const [newRecipeImages, setNewRecipeImages] = createSignal<NewRecipeImage[]>([]);
 
 	const toast = useToast();
 
@@ -45,6 +50,10 @@ export function Calendar(props: CalendarProps) {
 		} else {
 			setSelectedDate(viewDate);
 		}
+	});
+
+	onCleanup(() => {
+		newRecipeImages().forEach((img) => URL.revokeObjectURL(img.url));
 	});
 
 	const todayDateString = () => toLocalDateString(new Date());
@@ -89,15 +98,35 @@ export function Calendar(props: CalendarProps) {
 		}
 	};
 
+	const addFiles = (files: File[] | FileList) => {
+		const newFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
+		const newItems = newFiles.map((file) => ({
+			file,
+			url: URL.createObjectURL(file),
+		}));
+		setNewRecipeImages((prev) => [...prev, ...newItems]);
+	};
+
+	const removeImage = (index: number) => {
+		setNewRecipeImages((prev) => {
+			const newArray = [...prev];
+			const [removed] = newArray.splice(index, 1);
+			if (removed) URL.revokeObjectURL(removed.url);
+			return newArray;
+		});
+	};
+
+	const clearImages = () => {
+		newRecipeImages().forEach((img) => URL.revokeObjectURL(img.url));
+		setNewRecipeImages([]);
+	};
+
 	const handleAdd = async (e: Event) => {
 		e.preventDefault();
 		if (!selectedDate()) return;
 
-		let imageKey: string | undefined;
-		if (newRecipeImage()) {
-			const compressedImage = await compressImage(newRecipeImage()!);
-			imageKey = await uploadImage(compressedImage);
-		}
+		const compressedImages = await Promise.all(newRecipeImages().map((img) => compressImage(img.file)));
+		const imageKeys = await uploadImages(compressedImages);
 
 		const recipe: Parameters<typeof addRecipe>[0] = {
 			name: newRecipeName(),
@@ -108,7 +137,7 @@ export function Calendar(props: CalendarProps) {
 				.map((t) => t.trim())
 				.filter(Boolean),
 			date: toLocalDateString(selectedDate()!),
-			image: imageKey,
+			images: imageKeys,
 		};
 		try {
 			await addRecipe(recipe);
@@ -120,11 +149,11 @@ export function Calendar(props: CalendarProps) {
 			setNewRecipeDesc('');
 			setNewRecipeUrl(null);
 			setNewRecipeTags('');
-			setNewRecipeImage(null);
+			clearImages();
 
 			toast.addToast({
 				title: 'Success',
-				message: `${recipe.name} added successfully!`,
+				message: `"${recipe.name}" added successfully!`,
 				variant: 'default',
 			});
 		} catch (error) {
@@ -340,11 +369,59 @@ export function Calendar(props: CalendarProps) {
 					/>
 					<FileInput
 						id="image"
-						label="Recipe Image"
+						label="Recipe Images"
 						type="file"
 						accept="image/*"
-						onChange={(e) => setNewRecipeImage(e.currentTarget.files ? e.currentTarget.files[0] : null)}
+						multiple
+						onChange={(e) => {
+							const files = e.currentTarget.files;
+							if (files) {
+								addFiles(files);
+							}
+						}}
+						onPaste={(e) => {
+							const items = e.clipboardData?.items;
+							if (items) {
+								for (const item of Array.from(items)) {
+									if (item.type.startsWith('image/')) {
+										const file = item.getAsFile();
+										if (file) {
+											addFiles([file]);
+										}
+									}
+								}
+							}
+						}}
 					/>
+
+					<div class="flex-row gap-2 flex-wrap">
+						<For each={newRecipeImages()}>
+							{(item, index) => (
+								<div class="relative group">
+									<img src={item.url} alt="preview" class="w-20 h-20 object-cover rounded-md border-inverse shadow-sm" />
+									<button
+										type="button"
+										onClick={() => removeImage(index())}
+										class="absolute -top-2 -right-2 bg-50 border-inverse text-default rounded-full w-5 h-5 flex-col items-center justify-center "
+										aria-label="Remove image"
+									>
+										<svg
+											data-slot="icon"
+											fill="none"
+											stroke-width="2.5"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+											xmlns="http://www.w3.org/2000/svg"
+											aria-hidden="true"
+											class="w-3 h-3"
+										>
+											<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"></path>
+										</svg>
+									</button>
+								</div>
+							)}
+						</For>
+					</div>
 
 					<Button variant="primary" type="submit">
 						Save
@@ -387,8 +464,19 @@ export function Calendar(props: CalendarProps) {
 											<For each={recipe.tags}>{(tag) => <Badge>{tag}</Badge>}</For>
 										</div>
 									)}
-									{recipe.image && (
-										<img src={`/api/recipes/images/${recipe.image}`} alt={recipe.name} class="w-full object-cover aspect-square rounded" />
+									{recipe.images && recipe.images.length > 1 && (
+										<Slider>
+											{recipe.images.map((image) => (
+												<img src={`/api/recipes/images/${image}`} alt={recipe.name} class="w-full object-cover aspect-square rounded" />
+											))}
+										</Slider>
+									)}
+									{recipe.images && recipe.images.length === 1 && (
+										<img
+											src={`/api/recipes/images/${recipe.images[0]}`}
+											alt={recipe.name}
+											class="w-full object-cover aspect-square rounded"
+										/>
 									)}
 								</Card>
 							)}
