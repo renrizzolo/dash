@@ -242,7 +242,7 @@ export function Calendar(props: CalendarProps) {
 				<div
 					class={clsx(
 						'grid grid-cols-7 gap-2 w-full relative font-semibold',
-						props.isLoading && 'pointer-events-none animate-skeleton rounded-lg',
+						(props.isLoading || props.isFetching) && 'pointer-events-none loading-skeleton rounded-lg',
 					)}
 				>
 					{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
@@ -266,7 +266,9 @@ export function Calendar(props: CalendarProps) {
 								onClick={() => handleDateClick(day)}
 							>
 								{day ? day.getDate() : ''}
-								{day && getRecipesForDate(day).length > 0 && <div class="absolute bottom-3 w-1.5 h-1.5 bg-accent rounded-full mt-1"></div>}
+								{day && getRecipesForDate(day).length > 0 && (
+									<div class="absolute -bottom-0.5 xs:bottom-3 w-1.5 h-1.5 bg-accent rounded-full mt-1"></div>
+								)}
 							</button>
 						)}
 					</For>
@@ -464,6 +466,7 @@ export function Calendar(props: CalendarProps) {
 											<For each={recipe.tags}>{(tag) => <Badge>{tag}</Badge>}</For>
 										</div>
 									)}
+
 									{recipe.images && recipe.images.length > 1 && (
 										<Slider>
 											{recipe.images.map((image) => (
@@ -471,12 +474,17 @@ export function Calendar(props: CalendarProps) {
 											))}
 										</Slider>
 									)}
+
 									{recipe.images && recipe.images.length === 1 && (
 										<img
 											src={`/api/recipes/images/${recipe.images[0]}`}
 											alt={recipe.name}
 											class="w-full object-cover aspect-square rounded"
 										/>
+									)}
+
+									{recipe.image && (
+										<img src={`/api/recipes/images/${recipe.image}`} alt={recipe.name} class="w-full object-cover aspect-square rounded" />
 									)}
 								</Card>
 							)}

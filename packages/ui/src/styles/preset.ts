@@ -1,6 +1,14 @@
 // oxlint-disable no-explicit-any
 import { definePreset, presetIcons, presetWebFonts } from 'unocss';
 
+const breakpoints = {
+	xs: '480px',
+	sm: '640px',
+	md: '768px',
+	lg: '1024px',
+	xl: '1280px',
+};
+
 export const presetDash = () => [
 	definePreset(() => {
 		return {
@@ -64,12 +72,7 @@ export const presetDash = () => [
 						', ',
 					),
 				},
-				breakpoints: {
-					sm: '640px',
-					md: '768px',
-					lg: '1024px',
-					xl: '1280px',
-				},
+				breakpoints,
 				spacing: {
 					'0': '0',
 					'0.5': '0.125rem',
@@ -584,6 +587,20 @@ export const presetDash = () => [
 								transform: translateY(0);
 							}
 						}
+
+						.loading-skeleton::after {
+							content: '';
+							position: absolute;
+							top: 0;
+							left: 0;
+							width: 100%;
+							height: 100%;
+							background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0) 100%);
+							background-size: 200% 100%;
+							animation: skeleton-loading 2.5s infinite;
+							z-index: 10;
+							border-radius: 8px;
+						}
 					
 					`,
 				},
@@ -647,13 +664,6 @@ export const presetDash = () => [
 							selector: (s) => `${s}::before`,
 						};
 					}
-
-					const breakpoints = {
-						sm: '640px',
-						md: '768px',
-						lg: '1024px',
-						xl: '1280px',
-					};
 
 					for (const [bp, size] of Object.entries(breakpoints)) {
 						if (matcher.startsWith(`${bp}:`)) {
